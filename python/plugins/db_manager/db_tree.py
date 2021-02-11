@@ -55,8 +55,8 @@ class DBTree(QTreeView):
     def refreshItem(self, item=None):
         if item is None:
             item = self.currentItem()
-            if item is None:
-                return
+        if item is None:
+            return
         self.model().refreshItem(item)
 
     def showSystemTables(self, show):

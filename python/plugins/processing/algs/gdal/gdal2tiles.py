@@ -98,12 +98,16 @@ class gdal2tiles(GdalAlgorithm):
                                                        self.tr('Copyright of the map'),
                                                        optional=True))
 
-        params = []
-        params.append(QgsProcessingParameterEnum(self.RESAMPLING,
-                                                 self.tr('Resampling method'),
-                                                 options=[i[0] for i in self.methods],
-                                                 allowMultiple=False,
-                                                 defaultValue=0))
+        params = [
+            QgsProcessingParameterEnum(
+                self.RESAMPLING,
+                self.tr('Resampling method'),
+                options=[i[0] for i in self.methods],
+                allowMultiple=False,
+                defaultValue=0,
+            )
+        ]
+
         params.append(QgsProcessingParameterCrs(self.SOURCE_CRS,
                                                 self.tr('The spatial reference system used for the source input data'),
                                                 optional=True))
@@ -156,10 +160,13 @@ class gdal2tiles(GdalAlgorithm):
         return super().flags() | QgsProcessingAlgorithm.FlagDisplayNameIsLiteral
 
     def getConsoleCommands(self, parameters, context, feedback, executing=True):
-        arguments = []
+        arguments = [
+            '-p',
+            self.profiles[self.parameterAsEnum(parameters, self.PROFILE, context)][
+                1
+            ],
+        ]
 
-        arguments.append('-p')
-        arguments.append(self.profiles[self.parameterAsEnum(parameters, self.PROFILE, context)][1])
 
         zoom = self.parameterAsString(parameters, self.ZOOM, context)
         if zoom:

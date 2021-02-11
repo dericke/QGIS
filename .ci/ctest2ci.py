@@ -18,6 +18,7 @@
 ***************************************************************************
 """
 
+
 __author__ = 'Matthias Kuhn'
 __date__ = 'March 2017'
 __copyright__ = '(C) 2017, Matthias Kuhn'
@@ -35,7 +36,7 @@ import subprocess
 from termcolor import colored
 import string
 
-fold_stack = list()
+fold_stack = []
 printable = set(string.printable)
 
 

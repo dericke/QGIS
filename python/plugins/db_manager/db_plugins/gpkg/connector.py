@@ -142,15 +142,14 @@ class GPKGDBConnector(DBConnector):
             f = lyr.GetNextFeature()
             if f is None:
                 break
-            else:
-                field_vals = [f.GetFID()]
-                if lyr.GetLayerDefn().GetGeomType() != ogr.wkbNone:
-                    geom = f.GetGeometryRef()
-                    if geom is not None:
-                        geom = geom.ExportToWkt()
-                    field_vals += [geom]
-                field_vals += [f.GetField(i) for i in range(f.GetFieldCount())]
-                ret.append(field_vals)
+            field_vals = [f.GetFID()]
+            if lyr.GetLayerDefn().GetGeomType() != ogr.wkbNone:
+                geom = f.GetGeometryRef()
+                if geom is not None:
+                    geom = geom.ExportToWkt()
+                field_vals += [geom]
+            field_vals += [f.GetField(i) for i in range(f.GetFieldCount())]
+            ret.append(field_vals)
         return ret
 
     def _execute_and_commit(self, sql):

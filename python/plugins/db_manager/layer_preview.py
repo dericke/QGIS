@@ -119,9 +119,13 @@ class LayerPreview(QgsMapCanvas):
                     vl = None
 
             # remove old layer (if any) and set new
-            if self.currentLayerId:
-                if not QgsProject.instance().layerTreeRoot().findLayer(self.currentLayerId):
-                    QgsProject.instance().removeMapLayers([self.currentLayerId])
+            if (
+                self.currentLayerId
+                and not QgsProject.instance()
+                .layerTreeRoot()
+                .findLayer(self.currentLayerId)
+            ):
+                QgsProject.instance().removeMapLayers([self.currentLayerId])
 
             if vl and vl.isValid():
                 self.setLayers([vl])

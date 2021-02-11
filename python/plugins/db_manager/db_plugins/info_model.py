@@ -86,23 +86,17 @@ class DatabaseInfo(object):
 
         # connection details
         conn_details = self.connectionDetails()
-        if conn_details is None:
-            pass
-        else:
+        if conn_details is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Connection details'), conn_details))
 
         # database information
         general_info = self.generalInfo()
-        if general_info is None:
-            pass
-        else:
+        if general_info is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'General info'), general_info))
 
         # has spatial enabled?
         spatial_info = self.spatialInfo()
-        if spatial_info is None:
-            pass
-        else:
+        if spatial_info is not None:
             typename = self.db.connection().typeNameString()
             spatial_info = HtmlContent(spatial_info)
             if not spatial_info.hasContents():
@@ -111,9 +105,7 @@ class DatabaseInfo(object):
 
         # privileges
         priv_details = self.privilegesDetails()
-        if priv_details is None:
-            pass
-        else:
+        if priv_details is not None:
             priv_details = HtmlContent(priv_details)
             if not priv_details.hasContents():
                 priv_details = QApplication.translate("DBManagerPlugin", '<warning> This user has no privileges!')
@@ -155,15 +147,11 @@ class SchemaInfo(object):
         ret = []
 
         general_info = self.generalInfo()
-        if general_info is None:
-            pass
-        else:
+        if general_info is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Schema details'), general_info))
 
         priv_details = self.privilegesDetails()
-        if priv_details is None:
-            pass
-        else:
+        if priv_details is not None:
             priv_details = HtmlContent(priv_details)
             if not priv_details.hasContents():
                 priv_details = QApplication.translate("DBManagerPlugin",
@@ -294,16 +282,12 @@ class TableInfo(object):
         ret = []
 
         general_info = self.generalInfo()
-        if general_info is None:
-            pass
-        else:
+        if general_info is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'General info'), general_info))
 
         # spatial info
         spatial_info = self.spatialInfo()
-        if spatial_info is None:
-            pass
-        else:
+        if spatial_info is not None:
             spatial_info = HtmlContent(spatial_info)
             if not spatial_info.hasContents():
                 spatial_info = QApplication.translate("DBManagerPlugin", '<warning> This is not a spatial table.')
@@ -311,30 +295,22 @@ class TableInfo(object):
 
         # fields
         fields_details = self.fieldsDetails()
-        if fields_details is None:
-            pass
-        else:
+        if fields_details is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Fields'), fields_details))
 
         # constraints
         constraints_details = self.constraintsDetails()
-        if constraints_details is None:
-            pass
-        else:
+        if constraints_details is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Constraints'), constraints_details))
 
         # indexes
         indexes_details = self.indexesDetails()
-        if indexes_details is None:
-            pass
-        else:
+        if indexes_details is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Indexes'), indexes_details))
 
         # triggers
         triggers_details = self.triggersDetails()
-        if triggers_details is None:
-            pass
-        else:
+        if triggers_details is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Triggers'), triggers_details))
 
         return ret
@@ -347,18 +323,13 @@ class TableInfo(object):
 
         # view definition
         view_def = self.getViewDefinition()
-        if view_def is None:
-            pass
-        else:
+        if view_def is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'View definition'), view_def))
 
         return ret
 
     def toHtml(self):
-        if self.table.isView:
-            ret = self.getViewInfo()
-        else:
-            ret = self.getTableInfo()
+        ret = self.getViewInfo() if self.table.isView else self.getTableInfo()
         return HtmlContent(ret).toHtml()
 
 
@@ -422,10 +393,9 @@ class VectorTableInfo(TableInfo):
                 QApplication.translate("DBManagerPlugin", "<warning> There is no entry in geometry_columns!")))
 
         # find out whether the geometry column has spatial index on it
-        if not self.table.isView:
-            if not self.table.hasSpatialIndex():
-                ret.append(HtmlParagraph(QApplication.translate("DBManagerPlugin",
-                                                                '<warning> No spatial index defined (<a href="action:spatialindex/create">create it</a>)')))
+        if not self.table.isView and not self.table.hasSpatialIndex():
+            ret.append(HtmlParagraph(QApplication.translate("DBManagerPlugin",
+                                                            '<warning> No spatial index defined (<a href="action:spatialindex/create">create it</a>)')))
 
         return ret
 

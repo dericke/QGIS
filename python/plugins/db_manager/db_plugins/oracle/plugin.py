@@ -69,9 +69,7 @@ class OracleDBPlugin(DBPlugin):
 
     def connectToUri(self, uri):
         self.db = self.databasesFactory(self, uri)
-        if self.db:
-            return True
-        return False
+        return bool(self.db)
 
     def databasesFactory(self, connection, uri):
         return ORDatabase(connection, uri)
@@ -421,18 +419,24 @@ class ORTable(Table):
                 ret.append(fld)
 
         if onlyOne:
-            return ret[0] if len(ret) > 0 else None
+            return ret[0] if ret else None
         return ret
 
     def uri(self):
         uri = self.database().uri()
-        schema = self.schemaName() if self.schemaName() else ''
+        schema = self.schemaName() or ''
         geomCol = self.geomColumn if self.type in [
             Table.VectorType, Table.RasterType] else ""
         uniqueCol = self.getValidQgisUniqueFields(
             True) if self.isView else None
-        uri.setDataSource(schema, self.name, geomCol if geomCol else None,
-                          None, uniqueCol.name if uniqueCol else "")
+        uri.setDataSource(
+            schema,
+            self.name,
+            geomCol or None,
+            None,
+            uniqueCol.name if uniqueCol else "",
+        )
+
 
         # Handle geographic table
         if geomCol:
@@ -455,11 +459,10 @@ class ORVectorTable(ORTable, VectorTable):
         return ORVectorTableInfo(self)
 
     def runAction(self, action):
-        if action.startswith("extent/"):
-            if action == "extent/update":
-                self.aboutToChange.emit()
-                self.updateExtent()
-                return True
+        if action.startswith("extent/") and action == "extent/update":
+            self.aboutToChange.emit()
+            self.updateExtent()
+            return True
 
         if ORTable.runAction(self, action):
             return True
@@ -478,12 +481,9 @@ class ORVectorTable(ORTable, VectorTable):
         self.refresh()
 
     def hasSpatialIndex(self, geom_column=None):
-        geom_column = geom_column if geom_column else self.geomColumn
+        geom_column = geom_column or self.geomColumn
 
-        for idx in self.indexes():
-            if geom_column == idx.column:
-                return True
-        return False
+        return any(geom_column == idx.column for idx in self.indexes())
 
 
 class ORTableField(TableField):
@@ -497,21 +497,9 @@ class ORTableField(TableField):
 
         self.primaryKey = False
         self.num = int(self.num)
-        if self.charMaxLen == NULL:
-            self.charMaxLen = None
-        else:
-            self.charMaxLen = int(self.charMaxLen)
-
-        if self.modifier == NULL:
-            self.modifier = None
-        else:
-            self.modifier = int(self.modifier)
-
-        if self.notNull.upper() == u"Y":
-            self.notNull = False
-        else:
-            self.notNull = True
-
+        self.charMaxLen = None if self.charMaxLen == NULL else int(self.charMaxLen)
+        self.modifier = None if self.modifier == NULL else int(self.modifier)
+        self.notNull = self.notNull.upper() != u"Y"
         if self.comment == NULL:
             self.comment = u""
 
@@ -577,25 +565,10 @@ class ORTableConstraint(TableConstraint):
         else:
             self.type = ORTableConstraint.TypeUnknown
 
-        if row[6] == NULL:
-            self.checkSource = u""
-        else:
-            self.checkSource = row[6]
-
-        if row[8] == NULL:
-            self.foreignTable = u""
-        else:
-            self.foreignTable = row[8]
-
-        if row[7] == NULL:
-            self.foreignOnDelete = u""
-        else:
-            self.foreignOnDelete = row[7]
-
-        if row[9] == NULL:
-            self.foreignKey = u""
-        else:
-            self.foreignKey = row[9]
+        self.checkSource = u"" if row[6] == NULL else row[6]
+        self.foreignTable = u"" if row[8] == NULL else row[8]
+        self.foreignOnDelete = u"" if row[7] == NULL else row[7]
+        self.foreignKey = u"" if row[9] == NULL else row[9]
 
     def type2String(self):
         if self.type == ORTableConstraint.TypeCheck:
@@ -616,10 +589,7 @@ class ORTableConstraint(TableConstraint):
         for fld in fields:
             if fld.name == self.column:
                 field = fld
-        cols = {}
-        cols[0] = field
-
-        return cols
+        return {0: field}
 
 
 class ORTableIndex(TableIndex):
@@ -638,10 +608,7 @@ class ORTableIndex(TableIndex):
         for fld in fields:
             if fld.name == self.column:
                 field = fld
-        cols = {}
-        cols[0] = field
-
-        return cols
+        return {0: field}
 
 
 class ORTableTrigger(TableTrigger):

@@ -57,12 +57,11 @@ warnings.filterwarnings("ignore", "the sets module is deprecated")
 
 
 def showWarning(message, category, filename, lineno, file=None, line=None):
-    stk = ""
-    for s in traceback.format_stack()[:-2]:
-        if hasattr(s, 'decode'):
-            stk += s.decode(sys.getfilesystemencoding())
-        else:
-            stk += s
+    stk = "".join(
+        s.decode(sys.getfilesystemencoding()) if hasattr(s, 'decode') else s
+        for s in traceback.format_stack()[:-2]
+    )
+
     if hasattr(filename, 'decode'):
         decoded_filename = filename.decode(sys.getfilesystemencoding())
     else:
@@ -77,9 +76,10 @@ def showException(type, value, tb, msg, messagebar=False, level=Qgis.Warning):
     if msg is None:
         msg = QCoreApplication.translate('Python', 'An error has occurred while executing Python code:')
 
-    logmessage = ''
-    for s in traceback.format_exception(type, value, tb):
-        logmessage += s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
+    logmessage = ''.join(
+        s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
+        for s in traceback.format_exception(type, value, tb)
+    )
 
     title = QCoreApplication.translate('Python', 'Python error')
     QgsMessageLog.logMessage(logmessage, title, level)
@@ -99,7 +99,7 @@ def showException(type, value, tb, msg, messagebar=False, level=Qgis.Warning):
     bar = iface.messageBar() if iface else None
 
     # If it's not the main window see if we can find a message bar to report the error in
-    if not window.objectName() == "QgisApp":
+    if window.objectName() != "QgisApp":
         widgets = window.findChildren(QgsMessageBar)
         if widgets:
             # Grab the first message bar for now
@@ -150,10 +150,12 @@ def open_stack_dialog(type, value, tb, msg, pop_error=True):
 {pypath}
 </ul>'''
 
-    error = ''
     lst = traceback.format_exception(type, value, tb)
-    for s in lst:
-        error += s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
+    error = ''.join(
+        s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
+        for s in lst
+    )
+
     error = error.replace('\n', '<br>')
 
     main_error = lst[-1].decode('utf-8', 'replace') if hasattr(lst[-1], 'decode') else lst[-1]
@@ -658,7 +660,7 @@ using the "mod_spatialite" extension (python3)"""
 
     def fcnRegexp(pattern, string):
         result = re.search(pattern, string)
-        return True if result else False
+        return bool(result)
 
     con = sqlite3.dbapi2.connect(*args, **kwargs)
     con.enable_load_extension(True)

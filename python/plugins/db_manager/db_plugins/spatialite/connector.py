@@ -102,7 +102,7 @@ class SpatiaLiteDBConnector(DBConnector):
             c = self._get_cursor()
             self._execute(c, u"SELECT CheckSpatialMetaData()")
             v = c.fetchone()[0]
-            self.has_geometry_columns = v == 1 or v == 3
+            self.has_geometry_columns = v in [1, 3]
             self.has_spatialite4 = v == 3
         except Exception:
             self.has_geometry_columns = False
@@ -234,9 +234,11 @@ class SpatiaLiteDBConnector(DBConnector):
                                 srid
         """
 
-        if self.has_geometry_columns:
-            if self.has_spatialite4:
-                cols = """CASE geometry_type % 10
+        if not self.has_geometry_columns:
+            return []
+
+        if self.has_spatialite4:
+            cols = """CASE geometry_type % 10
                                   WHEN 1 THEN 'POINT'
                                   WHEN 2 THEN 'LINESTRING'
                                   WHEN 3 THEN 'POLYGON'
@@ -252,17 +254,14 @@ class SpatiaLiteDBConnector(DBConnector):
                                   WHEN 3 THEN 'XYZM'
                                   ELSE NULL
                                   END AS coord_dimension"""
-            else:
-                cols = "g.type,g.coord_dimension"
+        else:
+            cols = "g.type,g.coord_dimension"
 
-            # get geometry info from geometry_columns if exists
-            sql = u"""SELECT m.name, m.type = 'view', g.f_table_name, g.f_geometry_column, %s, g.srid
+        # get geometry info from geometry_columns if exists
+        sql = u"""SELECT m.name, m.type = 'view', g.f_table_name, g.f_geometry_column, %s, g.srid
                                                 FROM sqlite_master AS m JOIN geometry_columns AS g ON upper(m.name) = upper(g.f_table_name)
                                                 WHERE m.type in ('table', 'view')
                                                 ORDER BY m.name, g.f_geometry_column""" % cols
-
-        else:
-            return []
 
         c = self._get_cursor()
         self._execute(c, sql)

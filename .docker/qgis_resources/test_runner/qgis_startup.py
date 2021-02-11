@@ -12,9 +12,11 @@ import traceback
 
 def _showException(type, value, tb, msg, messagebar=False):
     print(msg)
-    logmessage = ''
-    for s in traceback.format_exception(type, value, tb):
-        logmessage += s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
+    logmessage = ''.join(
+        s.decode('utf-8', 'replace') if hasattr(s, 'decode') else s
+        for s in traceback.format_exception(type, value, tb)
+    )
+
     print(logmessage)
 
 

@@ -75,10 +75,7 @@ class rgb2pct(GdalAlgorithm):
         return 'rgb2pct'
 
     def getConsoleCommands(self, parameters, context, feedback, executing=True):
-        arguments = []
-        arguments.append('-n')
-        arguments.append(str(self.parameterAsInt(parameters, self.NCOLORS, context)))
-
+        arguments = ['-n', str(self.parameterAsInt(parameters, self.NCOLORS, context))]
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         self.setOutputValue(self.OUTPUT, out)
         arguments.append('-of')

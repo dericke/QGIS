@@ -423,8 +423,7 @@ class Grass7Algorithm(QgsProcessingAlgorithm):
                 getattr(self, fullName)(parameters, context, feedback)
 
         # Run GRASS
-        loglines = []
-        loglines.append(self.tr('GRASS GIS 7 execution commands'))
+        loglines = [self.tr('GRASS GIS 7 execution commands')]
         for line in self.commands:
             feedback.pushCommandInfo(line)
             loglines.append(line)
@@ -519,10 +518,7 @@ class Grass7Algorithm(QgsProcessingAlgorithm):
         )
         # Handle cell size
         if self.parameterDefinition(self.GRASS_REGION_CELLSIZE_PARAMETER):
-            if self.cellSize:
-                cellSize = self.cellSize
-            else:
-                cellSize = self.getDefaultCellSize()
+            cellSize = self.cellSize or self.getDefaultCellSize()
             command += ' res={}'.format(cellSize)
 
         # Handle align to resolution
@@ -790,9 +786,11 @@ class Grass7Algorithm(QgsProcessingAlgorithm):
         :param createOpt: creation options for format.
         :param metaOpt: metadata options for export.
         """
-        if not createOpt:
-            if outFormat in Grass7Utils.GRASS_RASTER_FORMATS_CREATEOPTS:
-                createOpt = Grass7Utils.GRASS_RASTER_FORMATS_CREATEOPTS[outFormat]
+        if (
+            not createOpt
+            and outFormat in Grass7Utils.GRASS_RASTER_FORMATS_CREATEOPTS
+        ):
+            createOpt = Grass7Utils.GRASS_RASTER_FORMATS_CREATEOPTS[outFormat]
 
         for cmd in [self.commands, self.outputCommands]:
             # Adjust region to layer before exporting
@@ -1075,8 +1073,9 @@ class Grass7Algorithm(QgsProcessingAlgorithm):
 
     def checkParameterValues(self, parameters, context):
         grass_parameters = {k: v for k, v in parameters.items()}
-        if self.module:
-            if hasattr(self.module, 'checkParameterValuesBeforeExecuting'):
-                func = getattr(self.module, 'checkParameterValuesBeforeExecuting')
-                return func(self, grass_parameters, context)
+        if self.module and hasattr(
+            self.module, 'checkParameterValuesBeforeExecuting'
+        ):
+            func = getattr(self.module, 'checkParameterValuesBeforeExecuting')
+            return func(self, grass_parameters, context)
         return super().checkParameterValues(grass_parameters, context)

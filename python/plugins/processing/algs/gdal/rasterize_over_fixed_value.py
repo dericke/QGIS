@@ -62,10 +62,14 @@ class rasterize_over_fixed_value(GdalAlgorithm):
                                                        type=QgsProcessingParameterNumber.Double,
                                                        defaultValue=0.0))
 
-        params = []
-        params.append(QgsProcessingParameterBoolean(self.ADD,
-                                                    self.tr('Add burn in values to existing raster values'),
-                                                    defaultValue=False))
+        params = [
+            QgsProcessingParameterBoolean(
+                self.ADD,
+                self.tr('Add burn in values to existing raster values'),
+                defaultValue=False,
+            )
+        ]
+
         params.append(QgsProcessingParameterString(self.EXTRA,
                                                    self.tr('Additional command-line parameters'),
                                                    defaultValue=None,
@@ -103,10 +107,12 @@ class rasterize_over_fixed_value(GdalAlgorithm):
 
         self.setOutputValue(self.OUTPUT, inLayer.source())
 
-        arguments = ['-l']
-        arguments.append(layerName)
-        arguments.append('-burn')
-        arguments.append(str(self.parameterAsDouble(parameters, self.BURN, context)))
+        arguments = [
+            '-l',
+            layerName,
+            '-burn',
+            str(self.parameterAsDouble(parameters, self.BURN, context)),
+        ]
 
         if self.parameterAsBool(parameters, self.ADD, context):
             arguments.append('-add')

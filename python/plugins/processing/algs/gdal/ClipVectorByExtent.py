@@ -86,9 +86,7 @@ class ClipVectorByExtent(GdalAlgorithm):
 
         output, outputFormat = GdalUtils.ogrConnectionStringAndFormat(outFile, context)
 
-        arguments = []
-        arguments.append('-spat')
-        arguments.append(str(extent.xMinimum()))
+        arguments = ['-spat', str(extent.xMinimum())]
         arguments.append(str(extent.yMaximum()))
         arguments.append(str(extent.xMaximum()))
         arguments.append(str(extent.yMinimum()))

@@ -104,9 +104,7 @@ class nearblack(GdalAlgorithm):
         if inLayer is None:
             raise QgsProcessingException(self.invalidRasterError(parameters, self.INPUT))
 
-        arguments = []
-        arguments.append(inLayer.source())
-
+        arguments = [inLayer.source()]
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         self.setOutputValue(self.OUTPUT, out)
         arguments.append('-of')

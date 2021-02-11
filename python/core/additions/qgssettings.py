@@ -115,9 +115,5 @@ def _qgssettings_flag_value(self, key, flagDefaultValue, section=QgsSettings.NoS
     meta_enum_2 = metaEnumFromValue(flagDefaultValue)
     (flag_val, ok) = meta_enum_2.keysToValue(str_val)
 
-    if not ok:
-        flag_val = flagDefaultValue
-    else:
-        flag_val = flagDefaultValue.__class__(flag_val)
-
+    flag_val = flagDefaultValue if not ok else flagDefaultValue.__class__(flag_val)
     return flag_val

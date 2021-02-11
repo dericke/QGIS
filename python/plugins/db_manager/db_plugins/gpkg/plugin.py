@@ -165,10 +165,9 @@ class GPKGDatabase(Database):
     def runAction(self, action):
         action = str(action)
 
-        if action.startswith("vacuum/"):
-            if action == "vacuum/run":
-                self.runVacuum()
-                return True
+        if action.startswith("vacuum/") and action == "vacuum/run":
+            self.runVacuum()
+            return True
 
         return Database.runAction(self, action)
 
@@ -178,8 +177,9 @@ class GPKGDatabase(Database):
     def toSqlLayer(self, sql, geomCol, uniqueCol, layerName="QueryLayer", layerType=None, avoidSelectById=False, filter=""):
         from qgis.core import QgsVectorLayer
 
-        vl = QgsVectorLayer(self.uri().database() + '|subset=' + sql, layerName, 'ogr')
-        return vl
+        return QgsVectorLayer(
+            self.uri().database() + '|subset=' + sql, layerName, 'ogr'
+        )
 
     def supportsComment(self):
         return False
@@ -202,8 +202,7 @@ class GPKGTable(Table):
         self.name, self.isView, self.isSysTable = row
 
     def ogrUri(self):
-        ogrUri = u"%s|layername=%s" % (self.uri().database(), self.name)
-        return ogrUri
+        return u"%s|layername=%s" % (self.uri().database(), self.name)
 
     def mimeUri(self):
         # QGIS has no provider to load Geopackage vectors, let's use OGR
@@ -291,8 +290,7 @@ class GPKGRasterTable(GPKGTable, RasterTable):
         self.extent = self.database().connector.getTableExtent((self.schemaName(), self.name), self.geomColumn)
 
     def gpkgGdalUri(self):
-        gdalUri = u'GPKG:%s:%s' % (self.uri().database(), self.prefixName)
-        return gdalUri
+        return u'GPKG:%s:%s' % (self.uri().database(), self.prefixName)
 
     def mimeUri(self):
         # QGIS has no provider to load rasters, let's use GDAL

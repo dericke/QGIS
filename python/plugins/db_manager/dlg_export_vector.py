@@ -120,8 +120,7 @@ class DlgExportVector(QDialog, Ui_Dialog):
         filt = settings.value(self.lastUsedVectorFilterSettingsKey, "GPKG")
 
         idx = self.cboFileFormat.findText(filt)
-        if idx < 0:
-            idx = 0
+        idx = max(idx, 0)
         self.cboFileFormat.setCurrentIndex(idx)
 
     def accept(self):

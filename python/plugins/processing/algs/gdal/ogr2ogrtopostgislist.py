@@ -237,17 +237,13 @@ class Ogr2OgrToPostGisList(GdalAlgorithm):
         append = self.parameterAsBoolean(parameters, self.APPEND, context)
         addfields = self.parameterAsBoolean(parameters, self.ADDFIELDS, context)
         launder = self.parameterAsBoolean(parameters, self.LAUNDER, context)
-        launderstring = "-lco LAUNDER=NO"
         index = self.parameterAsBoolean(parameters, self.INDEX, context)
-        indexstring = "-lco SPATIAL_INDEX=OFF"
         skipfailures = self.parameterAsBoolean(parameters, self.SKIPFAILURES, context)
         promotetomulti = self.parameterAsBoolean(parameters, self.PROMOTETOMULTI, context)
         precision = self.parameterAsBoolean(parameters, self.PRECISION, context)
         options = self.parameterAsString(parameters, self.OPTIONS, context)
 
-        arguments = []
-        arguments.append('-progress')
-        arguments.append('--config PG_USE_COPY YES')
+        arguments = ['-progress', '--config PG_USE_COPY YES']
         if shapeEncoding:
             arguments.append('--config')
             arguments.append('SHAPE_ENCODING')
@@ -263,8 +259,10 @@ class Ogr2OgrToPostGisList(GdalAlgorithm):
         arguments.append(ogrLayer)
         arguments.append(layername)
         if index:
+            indexstring = "-lco SPATIAL_INDEX=OFF"
             arguments.append(indexstring)
         if launder:
+            launderstring = "-lco LAUNDER=NO"
             arguments.append(launderstring)
         if append:
             arguments.append('-append')
@@ -326,12 +324,10 @@ class Ogr2OgrToPostGisList(GdalAlgorithm):
 
         commands = []
         if isWindows():
-            commands = ['cmd.exe', '/C ', 'ogr2ogr.exe',
+            return ['cmd.exe', '/C ', 'ogr2ogr.exe',
                         GdalUtils.escapeAndJoin(arguments)]
         else:
-            commands = ['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
-
-        return commands
+            return ['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
 
     def commandName(self):
         return "ogr2ogr"

@@ -99,8 +99,7 @@ class ORTableDataModel(TableDataModel):
                 start = int(self.rowCount() - margin)
             else:
                 start = int(row - margin)
-            if start < 0:
-                start = 0
+            start = max(start, 0)
             self.fetchMoreData(start)
 
         # For some improbable cases

@@ -170,12 +170,10 @@ class DlgSqlLayerWindow(QWidget, Ui_Dialog):
         sql = uri.table().replace('\n', ' ').strip()
         if uri.keyColumn() == '_uid_':
             match = re.search(r'^\(SELECT .+ AS _uid_,\* FROM \((.*)\) AS _subq_.+_\s*\)$', sql, re.S | re.X | re.IGNORECASE)
-            if match:
-                sql = match.group(1)
         else:
             match = re.search(r'^\((SELECT .+ FROM .+)\)$', sql, re.S | re.X | re.IGNORECASE)
-            if match:
-                sql = match.group(1)
+        if match:
+            sql = match.group(1)
         # Need to check on table() since the parentheses were removed by the regexp
         if not uri.table().startswith('(') and not uri.table().endswith(')'):
             schema = uri.schema()
@@ -317,11 +315,7 @@ class DlgSqlLayerWindow(QWidget, Ui_Dialog):
         else:
             uniqueFieldName = None
         hasGeomCol = self.hasGeometryCol.checkState() == Qt.Checked
-        if hasGeomCol:
-            geomFieldName = self.geomCombo.currentText()
-        else:
-            geomFieldName = None
-
+        geomFieldName = self.geomCombo.currentText() if hasGeomCol else None
         query = self._getSqlQuery()
         if query == "":
             return None
@@ -567,18 +561,18 @@ class DlgSqlLayerWindow(QWidget, Ui_Dialog):
         self.hasChanged = hasChanged
 
     def close(self):
-        if self.hasChanged:
-            ret = QMessageBox.question(
-                self, self.tr('Unsaved Changes?'),
-                self.tr('There are unsaved changes. Do you want to keep them?'),
-                QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Discard, QMessageBox.Cancel)
-
-            if ret == QMessageBox.Save:
-                self.saveAsFilePreset()
-                return True
-            elif ret == QMessageBox.Discard:
-                return True
-            else:
-                return False
-        else:
+        if not self.hasChanged:
             return True
+
+        ret = QMessageBox.question(
+            self, self.tr('Unsaved Changes?'),
+            self.tr('There are unsaved changes. Do you want to keep them?'),
+            QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Discard, QMessageBox.Cancel)
+
+        if ret == QMessageBox.Save:
+            self.saveAsFilePreset()
+            return True
+        elif ret == QMessageBox.Discard:
+            return True
+        else:
+            return False

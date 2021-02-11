@@ -74,10 +74,7 @@ class DlgFieldProperties(QDialog, Ui_Dialog):
         fld.comment = self.editCom.text()
         # length field also used for geometry definition, so we should
         # not cast its value to int
-        if self.editLength.text() != "":
-            fld.modifier = self.editLength.text()
-        else:
-            fld.modifier = None
+        fld.modifier = self.editLength.text() if self.editLength.text() != "" else None
         return fld
 
     def onOK(self):

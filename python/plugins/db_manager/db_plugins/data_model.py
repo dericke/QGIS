@@ -42,8 +42,8 @@ class BaseTableModel(QAbstractTableModel):
 
     def __init__(self, header=None, data=None, parent=None):
         QAbstractTableModel.__init__(self, parent)
-        self._header = header if header else []
-        self.resdata = data if data else []
+        self._header = header or []
+        self.resdata = data or []
 
     def headerToString(self, sep=u"\t"):
         header = self._header
@@ -135,8 +135,7 @@ class TableDataModel(BaseTableModel):
         if row < self.fetchedFrom or row >= self.fetchedFrom + self.fetchedCount:
             margin = self.fetchedCount / 2
             start = int(self.rowCount() - margin if row + margin >= self.rowCount() else row - margin)
-            if start < 0:
-                start = 0
+            start = max(start, 0)
             self.fetchMoreData(start)
         return self.resdata[row - self.fetchedFrom][col]
 

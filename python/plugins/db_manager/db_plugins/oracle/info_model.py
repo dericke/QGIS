@@ -192,7 +192,7 @@ class ORTableInfo(TableInfo):
             if table_priv[3]:
                 privileges.append("delete")
 
-            if len(privileges) > 0:
+            if privileges:
                 priv_string = u", ".join(privileges)
             else:
                 priv_string = QApplication.translate(
@@ -206,15 +206,20 @@ class ORTableInfo(TableInfo):
 
         ret.append(HtmlTable(tbl))
 
-        if schema_priv and schema_priv[1]:
-            if (table_priv[0] and
-                    not table_priv[1] and
-                    not table_priv[2] and
-                    not table_priv[3]):
-                ret.append(
-                    HtmlParagraph(QApplication.translate(
-                        "DBManagerPlugin",
-                        "<warning> This user has read-only privileges.")))
+        if (
+            schema_priv
+            and schema_priv[1]
+            and (
+                table_priv[0]
+                and not table_priv[1]
+                and not table_priv[2]
+                and not table_priv[3]
+            )
+        ):
+            ret.append(
+                HtmlParagraph(QApplication.translate(
+                    "DBManagerPlugin",
+                    "<warning> This user has read-only privileges.")))
 
         # primary key defined?
         if (not self.table.isView and
@@ -267,7 +272,7 @@ class ORTableInfo(TableInfo):
 
         # add table contents
         for fld in self.table.fields():
-            char_max_len = fld.charMaxLen if fld.charMaxLen else ""
+            char_max_len = fld.charMaxLen or ""
             if fld.modifier:
                 char_max_len = u"{},{}".format(char_max_len, fld.modifier)
             is_null_txt = "N" if fld.notNull else "Y"
@@ -390,9 +395,7 @@ class ORTableInfo(TableInfo):
         ret = []
 
         general_info = self.generalInfo()
-        if not general_info:
-            pass
-        else:
+        if general_info:
             ret.append(
                 HtmlSection(
                     QApplication.translate(
@@ -401,9 +404,7 @@ class ORTableInfo(TableInfo):
 
         # spatial info
         spatial_info = self.spatialInfo()
-        if not spatial_info:
-            pass
-        else:
+        if spatial_info:
             spatial_info = HtmlContent(spatial_info)
             if not spatial_info.hasContents():
                 spatial_info = QApplication.translate(
@@ -416,9 +417,7 @@ class ORTableInfo(TableInfo):
 
         # fields
         fields_details = self.fieldsDetails()
-        if not fields_details:
-            pass
-        else:
+        if fields_details:
             ret.append(
                 HtmlSection(
                     QApplication.translate(
@@ -428,9 +427,7 @@ class ORTableInfo(TableInfo):
 
         # constraints
         constraints_details = self.constraintsDetails()
-        if not constraints_details:
-            pass
-        else:
+        if constraints_details:
             ret.append(
                 HtmlSection(
                     QApplication.translate(
@@ -440,9 +437,7 @@ class ORTableInfo(TableInfo):
 
         # indexes
         indexes_details = self.indexesDetails()
-        if not indexes_details:
-            pass
-        else:
+        if indexes_details:
             ret.append(
                 HtmlSection(
                     QApplication.translate(
@@ -452,9 +447,7 @@ class ORTableInfo(TableInfo):
 
         # triggers
         triggers_details = self.triggersDetails()
-        if not triggers_details:
-            pass
-        else:
+        if triggers_details:
             ret.append(
                 HtmlSection(
                     QApplication.translate(
@@ -587,7 +580,7 @@ class ORVectorTableInfo(ORTableInfo, VectorTableInfo):
                     "Dimension:"),
                  self.table.geomDim))
 
-        srid = self.table.srid if self.table.srid else -1
+        srid = self.table.srid or -1
         if srid != -1:
             sr_info = (
                 self.table.database().connector.getSpatialRefInfo(srid))
@@ -659,14 +652,13 @@ class ORVectorTableInfo(ORTableInfo, VectorTableInfo):
                         "<warning> There is no entry in geometry_columns!")))
 
         # find out whether the geometry column has spatial index on it
-        if not self.table.isView:
-            if not self.table.hasSpatialIndex():
-                ret.append(
-                    HtmlParagraph(
-                        QApplication.translate(
-                            "DBManagerPlugin",
-                            (u'<warning> No spatial index defined (<a href='
-                             u'"action:spatialindex/create">'
-                             u'create it</a>).'))))
+        if not self.table.isView and not self.table.hasSpatialIndex():
+            ret.append(
+                HtmlParagraph(
+                    QApplication.translate(
+                        "DBManagerPlugin",
+                        (u'<warning> No spatial index defined (<a href='
+                         u'"action:spatialindex/create">'
+                         u'create it</a>).'))))
 
         return ret

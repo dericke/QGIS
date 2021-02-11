@@ -299,8 +299,7 @@ class VLayerConnector(DBConnector):
         if not l or not l.isValid():
             return None
         e = l.extent()
-        r = (e.xMinimum(), e.yMinimum(), e.xMaximum(), e.yMaximum())
-        return r
+        return e.xMinimum(), e.yMinimum(), e.xMaximum(), e.yMaximum()
 
     def getViewDefinition(self, view):
         print("**unimplemented** getViewDefinition")

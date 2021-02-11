@@ -57,10 +57,10 @@ class DlgAddGeometryColumn(QDialog, Ui_Dialog):
             srid = int(self.editSrid.text())
         except ValueError:
             srid = -1
-        createSpatialIndex = False
-
         # now create the geometry column
         with OverrideCursor(Qt.WaitCursor):
+            createSpatialIndex = False
+
             try:
                 self.table.addGeometryColumn(name, geom_type, srid, dim, createSpatialIndex)
             except DbError as e:

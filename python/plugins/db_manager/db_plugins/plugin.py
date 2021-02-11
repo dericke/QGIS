@@ -140,9 +140,7 @@ class DBPlugin(QObject):
 
     def connectToUri(self, uri):
         self.db = self.databasesFactory(self, uri)
-        if self.db:
-            return True
-        return False
+        return bool(self.db)
 
     def reconnect(self):
         if self.db is not None:
@@ -322,15 +320,14 @@ class Database(DbItemObject):
         return "row_number() over ()"
 
     def toSqlLayer(self, sql, geomCol, uniqueCol, layerName="QueryLayer", layerType=None, avoidSelectById=False, filter=""):
-        if uniqueCol is None:
-            if hasattr(self, 'uniqueIdFunction'):
-                uniqueFct = self.uniqueIdFunction()
-                if uniqueFct is not None:
-                    q = 1
-                    while "_subq_%d_" % q in sql:
-                        q += 1
-                    sql = u"SELECT %s AS _uid_,* FROM (%s\n) AS _subq_%d_" % (uniqueFct, sql, q)
-                    uniqueCol = "_uid_"
+        if uniqueCol is None and hasattr(self, 'uniqueIdFunction'):
+            uniqueFct = self.uniqueIdFunction()
+            if uniqueFct is not None:
+                q = 1
+                while "_subq_%d_" % q in sql:
+                    q += 1
+                sql = u"SELECT %s AS _uid_,* FROM (%s\n) AS _subq_%d_" % (uniqueFct, sql, q)
+                uniqueCol = "_uid_"
 
         uri = self.uri()
         uri.setDataSource("", u"(%s\n)" % sql, geomCol, filter, uniqueCol)
@@ -580,7 +577,7 @@ class Database(DbItemObject):
     def createTable(self, table, fields, schema=None):
         field_defs = [x.definition() for x in fields]
         pkeys = [x for x in fields if x.primaryKey]
-        pk_name = pkeys[0].name if len(pkeys) > 0 else None
+        pk_name = pkeys[0].name if pkeys else None
 
         ret = self.connector.createTable((schema, table), field_defs, pk_name)
         if ret is not False:
@@ -747,10 +744,17 @@ class Table(DbItemObject):
 
     def uri(self):
         uri = self.database().uri()
-        schema = self.schemaName() if self.schemaName() else ''
+        schema = self.schemaName() or ''
         geomCol = self.geomColumn if self.type in [Table.VectorType, Table.RasterType] else ""
         uniqueCol = self.getValidQgisUniqueFields(True) if self.isView else None
-        uri.setDataSource(schema, self.name, geomCol if geomCol else None, None, uniqueCol.name if uniqueCol else "")
+        uri.setDataSource(
+            schema,
+            self.name,
+            geomCol or None,
+            None,
+            uniqueCol.name if uniqueCol else "",
+        )
+
         return uri
 
     def crs(self):
@@ -803,7 +807,7 @@ class Table(DbItemObject):
                 ret.append(fld)
 
         if onlyOne:
-            return ret[0] if len(ret) > 0 else None
+            return ret[0] if ret else None
         return ret
 
     def tableDataModel(self, parent):
@@ -979,7 +983,7 @@ class Table(DbItemObject):
             finally:
                 QApplication.setOverrideCursor(Qt.WaitCursor)
 
-            if trigger_action == "enable" or trigger_action == "disable":
+            if trigger_action in ["enable", "disable"]:
                 enable = trigger_action == "enable"
                 self.aboutToChange.emit()
                 self.database().connector.enableAllTableTriggers(enable, (self.schemaName(), self.name))
@@ -1007,7 +1011,7 @@ class Table(DbItemObject):
                 self.refreshTriggers()
                 return True
 
-            elif trigger_action == "enable" or trigger_action == "disable":
+            elif trigger_action in ["enable", "disable"]:
                 enable = trigger_action == "enable"
                 self.aboutToChange.emit()
                 self.database().connector.enableTableTrigger(trigger_name, enable, (self.schemaName(), self.name))
@@ -1053,10 +1057,7 @@ class VectorTable(Table):
         if fld is None:
             return False
 
-        for idx in self.indexes():
-            if fld.num in idx.columns:
-                return True
-        return False
+        return any(fld.num in idx.columns for idx in self.indexes())
 
     def createSpatialIndex(self, geom_column=None):
         self.aboutToChange.emit()
@@ -1118,12 +1119,12 @@ class VectorTable(Table):
                 return True
 
         if action.startswith("extent/"):
-            if action == "extent/get":
-                self.refreshTableExtent()
-                return True
-
             if action == "extent/estimated/get":
                 self.refreshTableEstimatedExtent()
+                return True
+
+            elif action == "extent/get":
+                self.refreshTableExtent()
                 return True
 
         return Table.runAction(self, action)

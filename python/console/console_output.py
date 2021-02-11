@@ -209,7 +209,7 @@ class ShellOutputScintilla(QgsCodeEditorPython):
             runAction.setEnabled(True)
             copyAction.setEnabled(True)
             pyQGISHelpAction.setEnabled(True)
-        if not self.text(3) == '':
+        if self.text(3) != '':
             selectAllAction.setEnabled(True)
             clearAction.setEnabled(True)
         if self.parent.tabEditorWidget.isVisible():

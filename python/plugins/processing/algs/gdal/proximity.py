@@ -156,11 +156,12 @@ class proximity(GdalAlgorithm):
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         self.setOutputValue(self.OUTPUT, out)
 
-        arguments = []
-        arguments.append('-srcband')
-        arguments.append(str(self.parameterAsInt(parameters, self.BAND, context)))
+        arguments = [
+            '-srcband',
+            str(self.parameterAsInt(parameters, self.BAND, context)),
+            '-distunits',
+        ]
 
-        arguments.append('-distunits')
         arguments.append(self.distanceUnits[self.parameterAsEnum(parameters, self.UNITS, context)][1])
 
         values = self.parameterAsString(parameters, self.VALUES, context)

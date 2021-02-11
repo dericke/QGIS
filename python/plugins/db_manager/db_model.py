@@ -386,11 +386,10 @@ class DBModel(QAbstractItemModel):
             if icon:
                 return icon
 
-        if role != Qt.DisplayRole and role != Qt.EditRole:
+        if role not in [Qt.DisplayRole, Qt.EditRole]:
             return None
 
-        retval = index.internalPointer().data(index.column())
-        return retval
+        return index.internalPointer().data(index.column())
 
     def flags(self, index):
         global isImportVectorAvail
@@ -403,7 +402,7 @@ class DBModel(QAbstractItemModel):
         if index.column() == 0:
             item = index.internalPointer()
 
-            if isinstance(item, SchemaItem) or isinstance(item, TableItem):
+            if isinstance(item, (SchemaItem, TableItem)):
                 flags |= Qt.ItemIsEditable
 
             if isinstance(item, TableItem):
@@ -467,7 +466,7 @@ class DBModel(QAbstractItemModel):
         item = index.internalPointer()
         new_value = str(value)
 
-        if isinstance(item, SchemaItem) or isinstance(item, TableItem):
+        if isinstance(item, (SchemaItem, TableItem)):
             obj = item.getItemData()
 
             # rename schema or table or view
@@ -489,7 +488,7 @@ class DBModel(QAbstractItemModel):
     def removeRows(self, row, count, parent):
         self.beginRemoveRows(parent, row, count + row - 1)
         item = parent.internalPointer()
-        for i in range(row, count + row):
+        for _ in range(row, count + row):
             item.removeChild(row)
         self.endRemoveRows()
 
@@ -590,9 +589,10 @@ class DBModel(QAbstractItemModel):
 
         if data.hasFormat(self.QGIS_URI_MIME):
             for uri in QgsMimeDataUtils.decodeUriList(data):
-                if canImportLayer:
-                    if self.importLayer(uri.layerType, uri.providerKey, uri.name, uri.uri, parent):
-                        added += 1
+                if canImportLayer and self.importLayer(
+                    uri.layerType, uri.providerKey, uri.name, uri.uri, parent
+                ):
+                    added += 1
 
         return added > 0
 
@@ -604,7 +604,6 @@ class DBModel(QAbstractItemModel):
 
         if layerType == 'raster':
             return False  # not implemented yet
-            inLayer = QgsRasterLayer(uriString, layerName, providerKey)
         else:
             inLayer = QgsVectorLayer(uriString, layerName, providerKey)
 

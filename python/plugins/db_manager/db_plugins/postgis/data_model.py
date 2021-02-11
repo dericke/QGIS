@@ -36,8 +36,8 @@ class PGTableDataModel(TableDataModel):
 
         if self.table.rowCount is None:
             self.table.refreshRowCount()
-            if self.table.rowCount is None:
-                return
+        if self.table.rowCount is None:
+            return
 
         self.table.aboutToChange.connect(self._deleteCursor)
         self._createCursor()

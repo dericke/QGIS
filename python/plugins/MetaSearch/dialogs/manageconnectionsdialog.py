@@ -172,10 +172,7 @@ class ManageConnectionsDialog(QDialog, BASE_CLASS):
         if len(selection) == 0:
             return
 
-        items = []
-        for sel in selection:
-            items.append(sel.text())
-
+        items = [sel.text() for sel in selection]
         if self.mode == 0:  # save
             self.save(items)
         else:  # load

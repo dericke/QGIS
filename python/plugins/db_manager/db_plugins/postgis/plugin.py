@@ -334,7 +334,7 @@ class PGRasterTable(PGTable, RasterTable):
         passw = (u'password=%s' % uri.password()) if uri.password() else ''
         port = (u'port=%s' % uri.port()) if uri.port() else ''
 
-        schema = self.schemaName() if self.schemaName() else 'public'
+        schema = self.schemaName() or 'public'
         table = '"%s"."%s"' % (schema, self.name)
 
         if not dbname:
@@ -357,8 +357,9 @@ class PGRasterTable(PGTable, RasterTable):
         return uri
 
     def mimeUri(self):
-        uri = u"raster:postgresraster:{}:{}".format(self.name, re.sub(":", r"\:", self.uri()))
-        return uri
+        return u"raster:postgresraster:{}:{}".format(
+            self.name, re.sub(":", r"\:", self.uri())
+        )
 
     def toMapLayer(self):
         from qgis.core import QgsRasterLayer, QgsContrastEnhancement, QgsDataSourceUri, QgsCredentials
@@ -371,7 +372,7 @@ class PGRasterTable(PGTable, RasterTable):
             username = uri.username()
             password = uri.password()
 
-            for i in range(3):
+            for _ in range(3):
                 (ok, username, password) = QgsCredentials.instance().get(conninfo, username, password, err)
                 if ok:
                     uri.setUsername(username)
@@ -396,11 +397,7 @@ class PGTableField(TableField):
         trimmedTypeStr = typeStr.strip()
         regex = QRegExp("\\((.+)\\)$")
         startpos = regex.indexIn(trimmedTypeStr)
-        if startpos >= 0:
-            self.modifier = regex.cap(1).strip()
-        else:
-            self.modifier = None
-
+        self.modifier = regex.cap(1).strip() if startpos >= 0 else None
         # find out whether fields are part of primary key
         for con in self.table().constraints():
             if con.type == TableConstraint.TypePrimaryKey and self.num in con.columns:

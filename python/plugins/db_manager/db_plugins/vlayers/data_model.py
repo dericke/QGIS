@@ -141,23 +141,19 @@ class LSqlResultModel(BaseTableModel):
 
         if not layer.isValid():
             raise DbError(layer.dataProvider().error().summary(), sql)
-        else:
-            header = [f.name() for f in layer.fields()]
-            has_geometry = False
-            if layer.geometryType() != QgsWkbTypes.NullGeometry:
-                gn = getQueryGeometryName(path)
-                if gn:
-                    has_geometry = True
-                    header += [gn]
+        header = [f.name() for f in layer.fields()]
+        has_geometry = False
+        if layer.geometryType() != QgsWkbTypes.NullGeometry:
+            gn = getQueryGeometryName(path)
+            if gn:
+                has_geometry = True
+                header += [gn]
 
-            for f in layer.getFeatures():
-                a = f.attributes()
-                if has_geometry:
-                    if f.hasGeometry():
-                        a += [f.geometry().asWkt()]
-                    else:
-                        a += [None]
-                data += [a]
+        for f in layer.getFeatures():
+            a = f.attributes()
+            if has_geometry:
+                a += [f.geometry().asWkt()] if f.hasGeometry() else [None]
+            data += [a]
 
         self._secs = 0
         self._affectedRows = len(data)

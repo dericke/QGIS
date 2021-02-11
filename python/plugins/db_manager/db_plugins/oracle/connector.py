@@ -71,7 +71,7 @@ class OracleDBConnector(DBConnector):
 
         if self.host != "":
             self.dbname = self.host
-            if uri.port() != "" and uri.port() != "1521":
+            if uri.port() not in ["", "1521"]:
                 self.dbname += ":" + uri.port()
             if uri.database() != "":
                 self.dbname += "/" + uri.database()
@@ -171,9 +171,7 @@ class OracleDBConnector(DBConnector):
 
     def hasCache(self):
         """Returns self.cache_connection."""
-        if self.cache_connection:
-            return True
-        return False
+        return bool(self.cache_connection)
 
     def getSpatialInfo(self):
         """Returns Oracle Spatial version."""
@@ -615,11 +613,7 @@ class OracleDBConnector(DBConnector):
         for i, tbl in enumerate(lst_tables):
             item = list(tbl)
             detectedSrid = item.pop()
-            if detectedSrid == NULL:
-                detectedSrid = u"-1"
-            else:
-                detectedSrid = int(detectedSrid)
-
+            detectedSrid = u"-1" if detectedSrid == NULL else int(detectedSrid)
             if schema:
                 table_name = u"{0}.{1}".format(self.quoteId(schema),
                                                self.quoteId(item[0]))
@@ -646,9 +640,9 @@ class OracleDBConnector(DBConnector):
                 if not self.onlyExistingTypes:
                     geomMultiTypes.append(0)
                     multiSrids.append(multiSrids[0])
-                buf.append(u",".join([str(x) for x in
-                                      geomMultiTypes]))
-                buf.append(u",".join([str(x) for x in multiSrids]))
+                buf.append(u",".join(str(x) for x in
+                                                  geomMultiTypes))
+                buf.append(u",".join(str(x) for x in multiSrids))
                 items.append(buf)
 
             if self.allowGeometrylessTables and buf[-6] != u"UNKNOWN":
@@ -723,14 +717,13 @@ class OracleDBConnector(DBConnector):
         # Analyze return values
         if not res:
             return False
+        types = [x[0] for x in res]
+        if u"MATERIALIZED VIEW" in types:
+            return u"MATERIALIZED VIEW"
+        elif u"VIEW" in types:
+            return u"VIEW"
         else:
-            types = [x[0] for x in res]
-            if u"MATERIALIZED VIEW" in types:
-                return u"MATERIALIZED VIEW"
-            elif u"VIEW" in types:
-                return u"VIEW"
-            else:
-                return u"TABLE"
+            return u"TABLE"
 
     def pkCols(self, table):
         """Return the primary keys candidates for a view."""
@@ -907,12 +900,7 @@ class OracleDBConnector(DBConnector):
     def getSpatialFields(self, table):
         """Returns the list of geometric columns"""
         fields = self.getTableFields(table)
-        geomFields = []
-        for field in fields:
-            if field[2] == u"SDO_GEOMETRY":
-                geomFields.append(field[1])
-
-        return geomFields
+        return [field[1] for field in fields if field[2] == u"SDO_GEOMETRY"]
 
     def getTableIndexes(self, table):
         """Get info about table's indexes."""
@@ -1041,9 +1029,8 @@ class OracleDBConnector(DBConnector):
             res = self._fetchone(c)
             c.close()
 
-            if res:
-                if res[0] > 0:
-                    metadata = True
+            if res and res[0] > 0:
+                metadata = True
 
         return metadata
 
@@ -1057,11 +1044,10 @@ class OracleDBConnector(DBConnector):
 
         # if table as spatial index:
         indexes = self.getTableIndexes(table)
-        if indexes:
-            if u"SPATIAL_INDEX" in [f[2] for f in indexes]:
-                extentFunction = u"SDO_TUNE.EXTENT_OF({0}, {1})".format(
-                    tableQuote, self.quoteString(geom))
-                fromTable = u"DUAL"
+        if indexes and u"SPATIAL_INDEX" in [f[2] for f in indexes]:
+            extentFunction = u"SDO_TUNE.EXTENT_OF({0}, {1})".format(
+                tableQuote, self.quoteString(geom))
+            fromTable = u"DUAL"
 
         sql = u"""
         SELECT
@@ -1083,7 +1069,7 @@ class OracleDBConnector(DBConnector):
         if not res:
             res = None
 
-        return res if res else None
+        return res or None
 
     def getTableEstimatedExtent(self, table, geom):
         """Find out estimated extent (from metadata view)."""
@@ -1471,15 +1457,14 @@ class OracleDBConnector(DBConnector):
 
         if srid:
             update = u"{} SRID = {}".format(update, srid)
-        if extent:
-            if len(extent) == 4:
-                if update != u"SET":
-                    update = u"{},".format(update)
-                update = u"""{4} DIMINFO = MDSYS.SDO_DIM_ARRAY(
+        if extent and len(extent) == 4:
+            if update != u"SET":
+                update = u"{},".format(update)
+            update = u"""{4} DIMINFO = MDSYS.SDO_DIM_ARRAY(
                 MDSYS.SDO_DIM_ELEMENT('X', {0:.9f}, {1:.9f}, 0.005),
                 MDSYS.SDO_DIM_ELEMENT('Y', {2:.9f}, {3:.9f}, 0.005))
                 """.format(extent[0], extent[2], extent[1],
-                           extent[3], update)
+                       extent[3], update)
         if new_geom_column:
             if update != u"SET":
                 update = u"{},".format(update)
@@ -1516,13 +1501,14 @@ class OracleDBConnector(DBConnector):
         if len(extent) != 4:
             return False
         dims = [u'X', u'Y', u'Z', u'T']
-        extentParts = []
-        for i in range(dim):
-            extentParts.append(
-                u"""MDSYS.SDO_DIM_ELEMENT(
-                '{0}', {1:.9f}, {2:.9f}, 0.005)""".format(dims[i],
-                                                          extent[i],
-                                                          extent[i + 1]))
+        extentParts = [
+            u"""MDSYS.SDO_DIM_ELEMENT(
+                '{0}', {1:.9f}, {2:.9f}, 0.005)""".format(
+                dims[i], extent[i], extent[i + 1]
+            )
+            for i in range(dim)
+        ]
+
         extentParts = u",".join(extentParts)
         sqlExtent = u"""MDSYS.SDO_DIM_ARRAY(
                 {})
@@ -1559,7 +1545,7 @@ class OracleDBConnector(DBConnector):
 
         # Then insert the metadata
         extent = []
-        for i in range(dim):
+        for _ in range(dim):
             extent.extend([-100000, 10000])
         self.insertMetadata(table, geom_column,
                             [-100000, 100000, -10000, 10000],

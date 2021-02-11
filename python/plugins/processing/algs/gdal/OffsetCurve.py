@@ -102,18 +102,8 @@ class OffsetCurve(GdalAlgorithm):
                 continue
             other_fields.append('"{}"'.format(f.name()))
 
-        if other_fields:
-            other_fields = ',*'
-        else:
-            other_fields = ''
-
-        arguments = []
-        arguments.append(output)
-        arguments.append(ogrLayer)
-        arguments.append('-dialect')
-        arguments.append('sqlite')
-        arguments.append('-sql')
-
+        other_fields = ',*' if other_fields else ''
+        arguments = [output, ogrLayer, '-dialect', 'sqlite', '-sql']
         sql = 'SELECT ST_OffsetCurve({}, {}) AS {}{} FROM "{}"'.format(geometry, distance, geometry, other_fields, layerName)
         arguments.append(sql)
 

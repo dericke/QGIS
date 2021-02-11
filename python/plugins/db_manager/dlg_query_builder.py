@@ -279,10 +279,7 @@ class QueryBuilderDlg(QDialog):
 
         qtable = [t for t in self.tables if t.name.lower() == table.lower()][0].quotedName()
 
-        if self.ui.extract.isChecked():
-            limit = 10
-        else:
-            limit = None
+        limit = 10 if self.ui.extract.isChecked() else None
         model = self.db.columnUniqueValuesModel(item, qtable, limit)
         self.ui.values.setModel(model)
 

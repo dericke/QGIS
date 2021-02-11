@@ -103,14 +103,6 @@ def install():
 def package():
     """create zip file of plugin"""
 
-    skip_files = [
-        'AUTHORS.txt',
-        'CMakeLists.txt',
-        'requirements.txt',
-        'requirements-dev.txt',
-        'pavement.txt'
-    ]
-
     package_file = get_package_filename()
 
     if not os.path.exists(options.base.tmp):
@@ -118,6 +110,14 @@ def package():
     if os.path.exists(package_file):
         os.unlink(package_file)
     with zipfile.ZipFile(package_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        skip_files = [
+            'AUTHORS.txt',
+            'CMakeLists.txt',
+            'requirements.txt',
+            'requirements-dev.txt',
+            'pavement.txt'
+        ]
+
         for root, dirs, files in os.walk(options.base.plugin):
             for file_add in files:
                 if file_add.endswith('.pyc') or file_add in skip_files:
@@ -226,5 +226,4 @@ def get_package_filename():
     """return filepath of plugin zipfile"""
 
     filename = '%s-%s.zip' % (PLUGIN_NAME, options.base.version)
-    package_file = '%s/%s' % (options.base.tmp, filename)
-    return package_file
+    return '%s/%s' % (options.base.tmp, filename)

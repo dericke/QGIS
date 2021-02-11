@@ -166,11 +166,9 @@ def serialize_string(input_string):
     all_other_tokens_as_string = input_string.replace(last_token, '')
 
     if last_token.isdigit():
-        value = '%s%s' % (all_other_tokens_as_string, int(last_token) + 1)
+        return '%s%s' % (all_other_tokens_as_string, int(last_token) + 1)
     else:
-        value = '%s 1' % input_string
-
-    return value
+        return '%s 1' % input_string
 
 
 def clean_ows_url(url):

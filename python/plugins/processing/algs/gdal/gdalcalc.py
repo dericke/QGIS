@@ -190,11 +190,13 @@ class gdalcalc(GdalAlgorithm):
         else:
             noData = None
 
-        arguments = []
-        arguments.append('--calc "{}"'.format(formula))
-        arguments.append('--format')
-        arguments.append(GdalUtils.getFormatShortNameFromFilename(out))
-        arguments.append('--type')
+        arguments = [
+            '--calc "{}"'.format(formula),
+            '--format',
+            GdalUtils.getFormatShortNameFromFilename(out),
+            '--type',
+        ]
+
         arguments.append(self.TYPE[self.parameterAsEnum(parameters, self.RTYPE, context)])
         if noData is not None:
             arguments.append('--NoDataValue')

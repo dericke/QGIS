@@ -231,11 +231,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             # by QgsSettings, which probably means that this is the first time
             # the user has used CSWClient, so default to the first in the list
             # of connetions. Otherwise default to the last.
-            if not to_select:
-                current_index = 0
-            else:
-                current_index = conn_count - 1
-
+            current_index = 0 if not to_select else conn_count - 1
             self.cmbConnectionsServices.setCurrentIndex(current_index)
             self.cmbConnectionsSearch.setCurrentIndex(current_index)
 
@@ -531,11 +527,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.btnShowXml.setEnabled(True)
 
-        if self.catalog.results["matches"] < self.maxrecords:
-            disabled = False
-        else:
-            disabled = True
-
+        disabled = self.catalog.results["matches"] >= self.maxrecords
         self.btnFirst.setEnabled(disabled)
         self.btnPrev.setEnabled(disabled)
         self.btnNext.setEnabled(disabled)
@@ -966,28 +958,30 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         """set proxy if one is set in QGIS network settings"""
 
         # initially support HTTP for now
-        if self.settings.value('/proxy/proxyEnabled') == 'true':
-            if self.settings.value('/proxy/proxyType') == 'HttpProxy':
-                ptype = 'http'
-            else:
-                return
+        if self.settings.value('/proxy/proxyEnabled') != 'true':
+            return
 
-            user = self.settings.value('/proxy/proxyUser')
-            password = self.settings.value('/proxy/proxyPassword')
-            host = self.settings.value('/proxy/proxyHost')
-            port = self.settings.value('/proxy/proxyPort')
+        if self.settings.value('/proxy/proxyType') == 'HttpProxy':
+            ptype = 'http'
+        else:
+            return
 
-            proxy_up = ''
-            proxy_port = ''
+        user = self.settings.value('/proxy/proxyUser')
+        password = self.settings.value('/proxy/proxyPassword')
+        host = self.settings.value('/proxy/proxyHost')
+        port = self.settings.value('/proxy/proxyPort')
 
-            if all([user != '', password != '']):
-                proxy_up = '%s:%s@' % (user, password)
+        proxy_up = ''
+        proxy_port = ''
 
-            if port != '':
-                proxy_port = ':%s' % port
+        if all([user != '', password != '']):
+            proxy_up = '%s:%s@' % (user, password)
 
-            conn = '%s://%s%s%s' % (ptype, proxy_up, host, proxy_port)
-            install_opener(build_opener(ProxyHandler({ptype: conn})))
+        if port != '':
+            proxy_port = ':%s' % port
+
+        conn = '%s://%s%s%s' % (ptype, proxy_up, host, proxy_port)
+        install_opener(build_opener(ProxyHandler({ptype: conn})))
 
 
 def save_connections():
@@ -1015,7 +1009,7 @@ def _get_field_value(field):
 
     if field == 'identifier':
         value = 0
-    if field == 'link':
+    elif field == 'link':
         value = 1
 
     return value

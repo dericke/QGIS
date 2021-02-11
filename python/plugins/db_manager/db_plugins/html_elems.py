@@ -29,10 +29,8 @@ class HtmlContent(object):
         self.data = data if not isinstance(data, HtmlContent) else data.data
 
     def toHtml(self):
-        if isinstance(self.data, list) or isinstance(self.data, tuple):
-            html = u''
-            for item in self.data:
-                html += HtmlContent(item).toHtml()
+        if isinstance(self.data, (list, tuple)):
+            html = u''.join(HtmlContent(item).toHtml() for item in self.data)
             return html
 
         if hasattr(self.data, 'toHtml'):
@@ -42,12 +40,8 @@ class HtmlContent(object):
         return html
 
     def hasContents(self):
-        if isinstance(self.data, list) or isinstance(self.data, tuple):
-            empty = True
-            for item in self.data:
-                if item.hasContents():
-                    empty = False
-                    break
+        if isinstance(self.data, (list, tuple)):
+            empty = not any(item.hasContents() for item in self.data)
             return not empty
 
         if hasattr(self.data, 'hasContents'):
@@ -76,10 +70,7 @@ class HtmlElem(object):
         self.attrs[name] = value
 
     def getAttrsHtml(self):
-        html = u''
-        for k, v in self.attrs.items():
-            html += u' %s="%s"' % (k, v)
-        return html
+        return u''.join(u' %s="%s"' % (k, v) for k, v in self.attrs.items())
 
     def openTagHtml(self):
         return u"<%s%s>" % (self.tag, self.getAttrsHtml())

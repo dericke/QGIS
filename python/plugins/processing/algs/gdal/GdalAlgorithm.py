@@ -135,19 +135,19 @@ class GdalAlgorithm(QgsProcessingAlgorithm):
         GdalUtils.runGdal(commands, feedback)
 
         # auto generate outputs
-        results = {}
-        for o in self.outputDefinitions():
-            if o.name() in parameters:
-                results[o.name()] = parameters[o.name()]
+        results = {
+            o.name(): parameters[o.name()]
+            for o in self.outputDefinitions()
+            if o.name() in parameters
+        }
+
         for k, v in self.output_values.items():
             results[k] = v
 
         return results
 
     def commandName(self):
-        parameters = {}
-        for param in self.parameterDefinitions():
-            parameters[param.name()] = "1"
+        parameters = {param.name(): "1" for param in self.parameterDefinitions()}
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
         name = self.getConsoleCommands(parameters, context, feedback, executing=False)[0]

@@ -87,9 +87,7 @@ def check_comments_in_sql(raw_sql_input):
                 ]
                 identifiers = re.finditer(r'"(?:[^"]|"")*"', line)
                 quotes = re.finditer(r"'(?:[^']|'')*'", line)
-                quote_positions = []
-                for match in identifiers:
-                    quote_positions.append((match.start(), match.end()))
+                quote_positions = [(match.start(), match.end()) for match in identifiers]
                 for match in quotes:
                     quote_positions.append((match.start(), match.end()))
                 unquoted_comments = comment_positions.copy()
@@ -97,7 +95,7 @@ def check_comments_in_sql(raw_sql_input):
                     for quote_position in quote_positions:
                         if comment >= quote_position[0] and comment < quote_position[1]:
                             unquoted_comments.remove(comment)
-                if len(unquoted_comments) > 0:
+                if unquoted_comments:
                     lines.append(line[:unquoted_comments[0]])
                 else:
                     lines.append(line)
@@ -349,7 +347,7 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
 
     def updateUiWhileSqlExecution(self, status):
         if status:
-            for i in range(0, self.mainWindow.tabs.count()):
+            for i in range(self.mainWindow.tabs.count()):
                 if i != self.mainWindow.tabs.currentIndex():
                     self.mainWindow.tabs.setTabEnabled(i, False)
 
@@ -364,7 +362,7 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
             self.progressBar.setEnabled(True)
             self.progressBar.setRange(0, 0)
         else:
-            for i in range(0, self.mainWindow.tabs.count()):
+            for i in range(self.mainWindow.tabs.count()):
                 if i != self.mainWindow.tabs.currentIndex():
                     self.mainWindow.tabs.setTabEnabled(i, True)
 
@@ -462,11 +460,7 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
         else:
             uniqueFieldName = None
         hasGeomCol = self.hasGeometryCol.checkState() == Qt.Checked
-        if hasGeomCol:
-            geomFieldName = self.geomCombo.currentText()
-        else:
-            geomFieldName = None
-
+        geomFieldName = self.geomCombo.currentText() if hasGeomCol else None
         query = self._getExecutableSqlQuery()
         if query == "":
             return None
@@ -496,10 +490,9 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
                                    self.avoidSelectById.isChecked(), _filter)
         if layer.isValid():
             return layer
-        else:
-            e = BaseError(self.tr("There was an error creating the SQL layer, please check the logs for further information."))
-            DlgDbError.showError(e, self)
-            return None
+        e = BaseError(self.tr("There was an error creating the SQL layer, please check the logs for further information."))
+        DlgDbError.showError(e, self)
+        return None
 
     def loadSqlLayer(self):
         with OverrideCursor(Qt.WaitCursor):
@@ -707,18 +700,18 @@ class DlgSqlWindow(QWidget, Ui_Dialog):
         self.hasChanged = hasChanged
 
     def close(self):
-        if self.hasChanged:
-            ret = QMessageBox.question(
-                self, self.tr('Unsaved Changes?'),
-                self.tr('There are unsaved changes. Do you want to keep them?'),
-                QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Discard, QMessageBox.Cancel)
-
-            if ret == QMessageBox.Save:
-                self.saveAsFilePreset()
-                return True
-            elif ret == QMessageBox.Discard:
-                return True
-            else:
-                return False
-        else:
+        if not self.hasChanged:
             return True
+
+        ret = QMessageBox.question(
+            self, self.tr('Unsaved Changes?'),
+            self.tr('There are unsaved changes. Do you want to keep them?'),
+            QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Discard, QMessageBox.Cancel)
+
+        if ret == QMessageBox.Save:
+            self.saveAsFilePreset()
+            return True
+        elif ret == QMessageBox.Discard:
+            return True
+        else:
+            return False

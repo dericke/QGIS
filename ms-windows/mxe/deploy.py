@@ -112,7 +112,7 @@ def library_install_objdump(path, level):
 
 
 skip_libs = list()
-done = list()
+done = []
 
 
 def main():
@@ -121,8 +121,6 @@ def main():
 
     # library_install_exe(target)
     library_install_objdump(target, 0)
-
-    pass
 
 
 main()

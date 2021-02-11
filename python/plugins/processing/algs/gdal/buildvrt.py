@@ -69,8 +69,7 @@ class buildvrt(GdalAlgorithm):
                 super().__init__(name, description)
 
             def clone(self):
-                copy = ParameterVrtDestination(self.name(), self.description())
-                return copy
+                return ParameterVrtDestination(self.name(), self.description())
 
             def defaultFileExtension(self):
                 return 'vrt'
@@ -176,9 +175,13 @@ class buildvrt(GdalAlgorithm):
         return "gdalbuildvrt"
 
     def getConsoleCommands(self, parameters, context, feedback, executing=True):
-        arguments = []
-        arguments.append('-resolution')
-        arguments.append(self.RESOLUTION_OPTIONS[self.parameterAsEnum(parameters, self.RESOLUTION, context)][1])
+        arguments = [
+            '-resolution',
+            self.RESOLUTION_OPTIONS[
+                self.parameterAsEnum(parameters, self.RESOLUTION, context)
+            ][1],
+        ]
+
         if self.parameterAsBoolean(parameters, buildvrt.SEPARATE, context):
             arguments.append('-separate')
         if self.parameterAsBoolean(parameters, buildvrt.PROJ_DIFFERENCE, context):

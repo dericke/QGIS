@@ -127,10 +127,12 @@ class viewshed(GdalAlgorithm):
 
         observer = self.parameterAsPoint(parameters, self.OBSERVER, context, dem.crs())
 
-        arguments = []
-        arguments.append('-b')
-        arguments.append('{}'.format(self.parameterAsInt(parameters, self.BAND, context)))
-        arguments.append('-ox')
+        arguments = [
+            '-b',
+            '{}'.format(self.parameterAsInt(parameters, self.BAND, context)),
+            '-ox',
+        ]
+
         arguments.append('{}'.format(observer.x()))
         arguments.append('-oy')
         arguments.append('{}'.format(observer.y()))

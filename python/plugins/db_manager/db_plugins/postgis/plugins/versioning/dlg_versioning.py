@@ -88,7 +88,7 @@ class DlgVersioning(QDialog, Ui_DlgVersioning):
         if schemas is not None:
             schema_name = self.cboSchema.currentText()
             matching_schemas = [x for x in schemas if x.name == schema_name]
-            tables = matching_schemas[0].tables() if len(matching_schemas) > 0 else []
+            tables = matching_schemas[0].tables() if matching_schemas else []
         else:
             tables = self.db.tables()
 
@@ -193,7 +193,8 @@ class DlgVersioning(QDialog, Ui_DlgVersioning):
         all_cols = self.colPkey + "," + ",".join(self.columns)
         old_cols = ",".join(u"OLD." + x for x in self.columns)
 
-        sql = u"""
+        return (
+            u"""
 CREATE OR REPLACE FUNCTION %(func_at_time)s(timestamp)
 RETURNS SETOF %(view)s AS
 $$
@@ -231,10 +232,21 @@ BEGIN
   RETURN NEW;
 END;
 $$
-LANGUAGE 'plpgsql';""" % {'view': self.view, 'schematable': self.schematable, 'cols': cols, 'oldcols': old_cols,
-                          'start': self.colStart, 'end': self.colEnd, 'user': self.colUser, 'func_at_time': self.func_at_time,
-                          'all_cols': all_cols, 'func_update': self.func_update, 'func_insert': self.func_insert}
-        return sql
+LANGUAGE 'plpgsql';"""
+            % {
+                'view': self.view,
+                'schematable': self.schematable,
+                'cols': cols,
+                'oldcols': old_cols,
+                'start': self.colStart,
+                'end': self.colEnd,
+                'user': self.colUser,
+                'func_at_time': self.func_at_time,
+                'all_cols': all_cols,
+                'func_update': self.func_update,
+                'func_insert': self.func_insert,
+            }
+        )
 
     def sql_triggers(self):
         return u"""

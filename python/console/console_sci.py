@@ -149,10 +149,9 @@ class ShellScintilla(QgsCodeEditorPython, code.InteractiveInterpreter):
 
     def getText(self):
         """ Get the text as a unicode string. """
-        value = self.getBytes().decode('utf-8')
         # print (value) printing can give an error because the console font
         # may not have all unicode characters
-        return value
+        return self.getBytes().decode('utf-8')
 
     def getBytes(self):
         """ Get the text as bytes (utf-8 encoded). This is how
@@ -225,7 +224,7 @@ class ShellScintilla(QgsCodeEditorPython, code.InteractiveInterpreter):
         if isinstance(command, list):
             for line in command:
                 self.history.append(line)
-        elif not command == "":
+        elif command != "":
             if len(self.history) <= 0 or \
                     command != self.history[-1]:
                 self.history.append(command)
@@ -249,15 +248,15 @@ class ShellScintilla(QgsCodeEditorPython, code.InteractiveInterpreter):
 
     def readHistoryFile(self):
         fileExist = QFile.exists(_historyFile)
-        if fileExist:
-            with codecs.open(_historyFile, 'r', encoding='utf-8') as rH:
-                for line in rH:
-                    if line != "\n":
-                        l = line.rstrip('\n')
-                        self.updateHistory(l, True)
-            self.syncSoftHistory()
-        else:
+        if not fileExist:
             return
+
+        with codecs.open(_historyFile, 'r', encoding='utf-8') as rH:
+            for line in rH:
+                if line != "\n":
+                    l = line.rstrip('\n')
+                    self.updateHistory(l, True)
+        self.syncSoftHistory()
 
     def clearHistory(self, clearSession=False):
         if clearSession:

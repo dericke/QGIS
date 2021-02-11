@@ -91,10 +91,14 @@ class retile(GdalAlgorithm):
                                                        minValue=0,
                                                        defaultValue=1))
 
-        params = []
-        params.append(QgsProcessingParameterCrs(self.SOURCE_CRS,
-                                                self.tr('Source coordinate reference system'),
-                                                optional=True))
+        params = [
+            QgsProcessingParameterCrs(
+                self.SOURCE_CRS,
+                self.tr('Source coordinate reference system'),
+                optional=True,
+            )
+        ]
+
         params.append(QgsProcessingParameterEnum(self.RESAMPLING,
                                                  self.tr('Resampling method'),
                                                  options=[i[0] for i in self.methods],
@@ -162,10 +166,12 @@ class retile(GdalAlgorithm):
         return "gdal_retile"
 
     def getConsoleCommands(self, parameters, context, feedback, executing=True):
-        arguments = []
+        arguments = [
+            '-ps',
+            str(self.parameterAsInt(parameters, self.TILE_SIZE_X, context)),
+        ]
 
-        arguments.append('-ps')
-        arguments.append(str(self.parameterAsInt(parameters, self.TILE_SIZE_X, context)))
+
         arguments.append(str(self.parameterAsInt(parameters, self.TILE_SIZE_Y, context)))
 
         arguments.append('-overlap')

@@ -118,8 +118,7 @@ class pansharp(GdalAlgorithm):
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         self.setOutputValue(self.OUTPUT, out)
 
-        arguments = []
-        arguments.append(panchromatic.source())
+        arguments = [panchromatic.source()]
         arguments.append(spectral.source())
         arguments.append(out)
 

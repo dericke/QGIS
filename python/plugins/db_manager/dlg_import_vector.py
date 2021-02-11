@@ -201,9 +201,9 @@ class DlgImportVector(QDialog, Ui_Dialog):
         self.cboTable.setEditText(self.inLayer.name())
 
         srcUri = QgsDataSourceUri(self.inLayer.source())
-        pk = srcUri.keyColumn() if srcUri.keyColumn() else self.default_pk
+        pk = srcUri.keyColumn() or self.default_pk
         self.editPrimaryKey.setText(pk)
-        geom = srcUri.geometryColumn() if srcUri.geometryColumn() else self.default_geom
+        geom = srcUri.geometryColumn() or self.default_geom
         self.editGeomColumn.setText(geom)
 
         srcCrs = self.inLayer.crs()
@@ -244,7 +244,7 @@ class DlgImportVector(QDialog, Ui_Dialog):
         if schemas is not None:
             schema_name = self.cboSchema.currentText()
             matching_schemas = [x for x in schemas if x.name == schema_name]
-            tables = matching_schemas[0].tables() if len(matching_schemas) > 0 else []
+            tables = matching_schemas[0].tables() if matching_schemas else []
         else:
             tables = self.db.tables()
 
@@ -275,17 +275,23 @@ class DlgImportVector(QDialog, Ui_Dialog):
             QMessageBox.critical(self, self.tr("Import to Database"), self.tr("Output table name is required."))
             return
 
-        if self.chkSourceSrid.isEnabled() and self.chkSourceSrid.isChecked():
-            if not self.widgetSourceSrid.crs().isValid():
-                QMessageBox.critical(self, self.tr("Import to Database"),
-                                     self.tr("Invalid source srid: must be a valid crs."))
-                return
+        if (
+            self.chkSourceSrid.isEnabled()
+            and self.chkSourceSrid.isChecked()
+            and not self.widgetSourceSrid.crs().isValid()
+        ):
+            QMessageBox.critical(self, self.tr("Import to Database"),
+                                 self.tr("Invalid source srid: must be a valid crs."))
+            return
 
-        if self.chkTargetSrid.isEnabled() and self.chkTargetSrid.isChecked():
-            if not self.widgetTargetSrid.crs().isValid():
-                QMessageBox.critical(self, self.tr("Import to Database"),
-                                     self.tr("Invalid target srid: must be a valid crs."))
-                return
+        if (
+            self.chkTargetSrid.isEnabled()
+            and self.chkTargetSrid.isChecked()
+            and not self.widgetTargetSrid.crs().isValid()
+        ):
+            QMessageBox.critical(self, self.tr("Import to Database"),
+                                 self.tr("Invalid target srid: must be a valid crs."))
+            return
 
         with OverrideCursor(Qt.WaitCursor):
             # store current input layer crs and encoding, so I can restore it

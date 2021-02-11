@@ -82,8 +82,7 @@ class Datasources2Vrt(GdalAlgorithm):
                 super().__init__(name, description)
 
             def clone(self):
-                copy = ParameterVectorVrtDestination(self.name(), self.description())
-                return copy
+                return ParameterVectorVrtDestination(self.name(), self.description())
 
             def defaultFileExtension(self):
                 return 'vrt'

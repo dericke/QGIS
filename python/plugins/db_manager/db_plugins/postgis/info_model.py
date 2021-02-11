@@ -96,31 +96,49 @@ class PGTableInfo(TableInfo):
                 privileges.append("update")
             if table_priv[3]:
                 privileges.append("delete")
-            priv_string = u", ".join(privileges) if len(privileges) > 0 else QApplication.translate("DBManagerPlugin",
-                                                                                                    '<warning> This user has no privileges!')
+            priv_string = (
+                u", ".join(privileges)
+                if privileges
+                else QApplication.translate(
+                    "DBManagerPlugin", '<warning> This user has no privileges!'
+                )
+            )
+
             tbl.append((QApplication.translate("DBManagerPlugin", "Privileges:"), priv_string))
 
         ret.append(HtmlTable(tbl))
 
-        if schema_priv is not None and schema_priv[1]:
-            if table_priv[0] and not table_priv[1] and not table_priv[2] and not table_priv[3]:
-                ret.append(HtmlParagraph(
-                    QApplication.translate("DBManagerPlugin", "<warning> This user has read-only privileges.")))
+        if (
+            schema_priv is not None
+            and schema_priv[1]
+            and table_priv[0]
+            and not table_priv[1]
+            and not table_priv[2]
+            and not table_priv[3]
+        ):
+            ret.append(HtmlParagraph(
+                QApplication.translate("DBManagerPlugin", "<warning> This user has read-only privileges.")))
 
-        if not self.table.isView:
-            if self.table.rowCount is not None:
-                if abs(self.table.estimatedRowCount - self.table.rowCount) > 1 and \
-                        (self.table.estimatedRowCount > 2 * self.table.rowCount
-                         or self.table.rowCount > 2 * self.table.estimatedRowCount):
-                    ret.append(HtmlParagraph(QApplication.translate("DBManagerPlugin",
-                                                                    "<warning> There's a significant difference between estimated and real row count. "
-                                                                    'Consider running <a href="action:vacuumanalyze/run">VACUUM ANALYZE</a>.')))
+        if (
+            not self.table.isView
+            and self.table.rowCount is not None
+            and abs(self.table.estimatedRowCount - self.table.rowCount) > 1
+            and (
+                self.table.estimatedRowCount > 2 * self.table.rowCount
+                or self.table.rowCount > 2 * self.table.estimatedRowCount
+            )
+        ):
+            ret.append(HtmlParagraph(QApplication.translate("DBManagerPlugin",
+                                                            "<warning> There's a significant difference between estimated and real row count. "
+                                                            'Consider running <a href="action:vacuumanalyze/run">VACUUM ANALYZE</a>.')))
 
         # primary key defined?
-        if not self.table.isView:
-            if len([fld for fld in self.table.fields() if fld.primaryKey]) <= 0:
-                ret.append(HtmlParagraph(
-                    QApplication.translate("DBManagerPlugin", "<warning> No primary key defined for this table!")))
+        if (
+            not self.table.isView
+            and len([fld for fld in self.table.fields() if fld.primaryKey]) <= 0
+        ):
+            ret.append(HtmlParagraph(
+                QApplication.translate("DBManagerPlugin", "<warning> No primary key defined for this table!")))
 
         return ret
 
@@ -232,9 +250,7 @@ class PGTableInfo(TableInfo):
 
         # rules
         rules_details = self.rulesDetails()
-        if rules_details is None:
-            pass
-        else:
+        if rules_details is not None:
             ret.append(HtmlSection(QApplication.translate("DBManagerPlugin", 'Rules'), rules_details))
 
         return ret

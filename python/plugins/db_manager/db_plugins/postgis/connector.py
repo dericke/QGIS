@@ -137,7 +137,7 @@ class CursorAdapter():
                     count = len(self.connection.executeSql(self.sql)[0])
                 except QgsProviderConnectionException:
                     count = 1
-                for i in range(count):
+                for _ in range(count):
                     self._description.append([
                         '',  # name
                         '',  # type_code
@@ -180,9 +180,8 @@ class CursorAdapter():
     def fetchone(self):
         self._execute()
         if len(self.result) - self.cursor:
-            res = self.result[self.cursor]
             ++self.cursor
-            return res
+            return self.result[self.cursor]
         return None
 
     def fetchmany(self, size):
@@ -194,8 +193,7 @@ class CursorAdapter():
         self._debug("fetchmany: cursor: " + str(self.cursor) + " leftover: " + str(leftover) + " requested: " + str(size))
         if leftover < 1:
             return []
-        if size > leftover:
-            size = leftover
+        size = min(size, leftover)
         stop = self.cursor + size
         res = self.result[self.cursor:stop]
         self.cursor = stop
@@ -786,9 +784,11 @@ class PostGisDBConnector(DBConnector):
         pgis_major_version = int(pgis_versions[0])
         pgis_minor_version = int(pgis_versions[1])
         pgis_old = False
-        if pgis_major_version < 2:
-            pgis_old = True
-        elif pgis_major_version == 2 and pgis_minor_version < 1:
+        if (
+            pgis_major_version < 2
+            or pgis_major_version == 2
+            and pgis_minor_version < 1
+        ):
             pgis_old = True
         subquery = u"SELECT %s(%s%s,%s) AS extent" % (
             'st_estimated_extent' if pgis_old else 'st_estimatedextent',
@@ -833,8 +833,7 @@ class PostGisDBConnector(DBConnector):
             return QgsCoordinateReferenceSystem()
 
         proj4text = res[0]
-        crs = QgsCoordinateReferenceSystem.fromProj(proj4text)
-        return crs
+        return QgsCoordinateReferenceSystem.fromProj(proj4text)
 
     def getSpatialRefInfo(self, srid):
         if not self.has_spatial:
@@ -905,10 +904,8 @@ class PostGisDBConnector(DBConnector):
         schema_part = u"%s, " % self.quoteString(schema) if schema is not None else ""
         if self.isVectorTable(table):
             sql = u"SELECT DropGeometryTable(%s%s)" % (schema_part, self.quoteString(tablename))
-        elif self.isRasterTable(table):
-            # Fix #8521: delete raster table and references from raster_columns table
-            sql = u"DROP TABLE %s" % self.quoteId(table)
         else:
+            # Fix #8521: delete raster table and references from raster_columns table
             sql = u"DROP TABLE %s" % self.quoteId(table)
         self._execute_and_commit(sql)
 
@@ -1095,7 +1092,7 @@ class PostGisDBConnector(DBConnector):
                 col_actions.append(u"SET DEFAULT %s" % default)
             else:
                 col_actions.append(u"DROP DEFAULT")
-        if len(col_actions) > 0:
+        if col_actions:
             sql = u"ALTER TABLE %s" % self.quoteId(table)
             alter_col_str = u"ALTER %s" % self.quoteId(column)
             for a in col_actions:

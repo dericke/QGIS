@@ -82,10 +82,7 @@ class AssignProjection(GdalAlgorithm):
 
         crs = self.parameterAsCrs(parameters, self.CRS, context)
 
-        arguments = []
-        arguments.append('-a_srs')
-        arguments.append(GdalUtils.gdal_crs_string(crs))
-
+        arguments = ['-a_srs', GdalUtils.gdal_crs_string(crs)]
         arguments.append(fileName)
 
         if isWindows():

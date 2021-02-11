@@ -128,10 +128,8 @@ class ConsoleOptionsWidget(QWidget, Ui_SettingsDialogPythonConsole):
             return
         if pap_file:
             api_lexer = 'QsciLexerPython'
-            api_files = []
             count = self.tableWidget.rowCount()
-            for i in range(0, count):
-                api_files.append(self.tableWidget.item(i, 1).text())
+            api_files = [self.tableWidget.item(i, 1).text() for i in range(count)]
             api_dlg = PrepareAPIDialog(api_lexer, api_files, pap_file, self)
             api_dlg.show()
             api_dlg.activateWindow()
@@ -140,13 +138,15 @@ class ConsoleOptionsWidget(QWidget, Ui_SettingsDialogPythonConsole):
             self.lineEdit.setText(pap_file)
 
     def accept(self):
-        if not self.preloadAPI.isChecked() and \
-                not self.groupBoxPreparedAPI.isChecked():
-            if self.tableWidget.rowCount() == 0:
-                QMessageBox.information(
-                    self, self.tr("Warning!"),
-                    self.tr('Please specify API file or check "Use preloaded API files"'))
-                return
+        if (
+            not self.preloadAPI.isChecked()
+            and not self.groupBoxPreparedAPI.isChecked()
+            and self.tableWidget.rowCount() == 0
+        ):
+            QMessageBox.information(
+                self, self.tr("Warning!"),
+                self.tr('Please specify API file or check "Use preloaded API files"'))
+            return
         if self.groupBoxPreparedAPI.isChecked() and \
                 not self.lineEdit.text():
             QMessageBox.information(
@@ -180,7 +180,7 @@ class ConsoleOptionsWidget(QWidget, Ui_SettingsDialogPythonConsole):
 
         settings.setValue("pythonConsole/accessTokenGithub", self.tokenGhLineEdit.text())
 
-        for i in range(0, self.tableWidget.rowCount()):
+        for i in range(self.tableWidget.rowCount()):
             text = self.tableWidget.item(i, 1).text()
             self.listPath.append(text)
         settings.setValue("pythonConsole/userAPI", self.listPath)

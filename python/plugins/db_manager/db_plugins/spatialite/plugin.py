@@ -159,10 +159,9 @@ class SLDatabase(Database):
     def runAction(self, action):
         action = str(action)
 
-        if action.startswith("vacuum/"):
-            if action == "vacuum/run":
-                self.runVacuum()
-                return True
+        if action.startswith("vacuum/") and action == "vacuum/run":
+            self.runVacuum()
+            return True
 
         return Database.runAction(self, action)
 
@@ -186,8 +185,7 @@ class SLTable(Table):
         self.name, self.isView, self.isSysTable = row
 
     def ogrUri(self):
-        ogrUri = u"%s|layername=%s" % (self.uri().database(), self.name)
-        return ogrUri
+        return u"%s|layername=%s" % (self.uri().database(), self.name)
 
     def mimeUri(self):
         return Table.mimeUri(self)
@@ -270,8 +268,7 @@ class SLRasterTable(SLTable, RasterTable):
         # return SLRasterTableInfo(self)
 
     def rasterliteGdalUri(self):
-        gdalUri = u'RASTERLITE:%s,table=%s' % (self.uri().database(), self.prefixName)
-        return gdalUri
+        return u'RASTERLITE:%s,table=%s' % (self.uri().database(), self.prefixName)
 
     def mimeUri(self):
         # QGIS has no provider to load rasters, let's use GDAL

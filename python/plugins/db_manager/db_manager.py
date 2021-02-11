@@ -316,9 +316,11 @@ class DBManager(QMainWindow):
         if menuName is None or menuName == "":
             self.removeAction(action)
 
-            if menuName in self._registeredDbActions:
-                if self._registeredDbActions[menuName].count(action) > 0:
-                    self._registeredDbActions[menuName].remove(action)
+            if (
+                menuName in self._registeredDbActions
+                and self._registeredDbActions[menuName].count(action) > 0
+            ):
+                self._registeredDbActions[menuName].remove(action)
 
             action.deleteLater()
             return True
@@ -361,14 +363,13 @@ class DBManager(QMainWindow):
 
     def close_tab(self, index):
         widget = self.tabs.widget(index)
-        if widget not in [self.info, self.table, self.preview]:
-            if hasattr(widget, "close"):
-                if widget.close():
-                    self.tabs.removeTab(index)
-                    widget.deleteLater()
-            else:
-                self.tabs.removeTab(index)
-                widget.deleteLater()
+        if widget not in [self.info, self.table, self.preview] and (
+            hasattr(widget, "close")
+            and widget.close()
+            or not hasattr(widget, "close")
+        ):
+            self.tabs.removeTab(index)
+            widget.deleteLater()
 
     def toolBarOrientation(self):
         button_style = Qt.ToolButtonIconOnly
@@ -401,7 +402,10 @@ class DBManager(QMainWindow):
         self.tabs.tabCloseRequested.connect(self.close_tab)
         tabbar = self.tabs.tabBar()
         for i in range(3):
-            btn = tabbar.tabButton(i, QTabBar.RightSide) if tabbar.tabButton(i, QTabBar.RightSide) else tabbar.tabButton(i, QTabBar.LeftSide)
+            btn = tabbar.tabButton(i, QTabBar.RightSide) or tabbar.tabButton(
+                i, QTabBar.LeftSide
+            )
+
             btn.resize(0, 0)
             btn.hide()
 

@@ -222,7 +222,7 @@ class Editor(QgsCodeEditorPython):
             cutAction.setEnabled(True)
             gist_menu.setEnabled(True)
             pyQGISHelpAction.setEnabled(True)
-        if not self.text() == '':
+        if self.text() != '':
             selectAllAction.setEnabled(True)
             syntaxCheckAction.setEnabled(True)
         if self.isUndoAvailable():
@@ -244,7 +244,6 @@ class Editor(QgsCodeEditorPython):
         else:
             line, index = self.getCursorPosition()
         text = self.parent.pc.lineEditFind.text()
-        re = False
         wrap = self.parent.pc.wrapAround.isChecked()
         cs = self.parent.pc.caseSensitive.isChecked()
         wo = self.parent.pc.wholeWord.isChecked()
@@ -253,6 +252,7 @@ class Editor(QgsCodeEditorPython):
             if not forward:
                 line = lineFrom
                 index = indexFrom
+            re = False
             # findFirst(QString(), re bool, cs bool, wo bool, wrap, bool, forward=True)
             # re = Regular Expression, cs = Case Sensitive, wo = Whole Word, wrap = Wrap Around
             if not self.findFirst(text, re, cs, wo, wrap, forward, line, index):
@@ -295,7 +295,7 @@ class Editor(QgsCodeEditorPython):
 
         path = self.parent.tw.currentWidget().path
         filename = os.path.basename(path) if path else None
-        filename = filename if filename else "pyqgis_snippet.py"
+        filename = filename or "pyqgis_snippet.py"
 
         selected_text = self.selectedText()
         data = {"description": "Gist created by PyQGIS Console",
@@ -404,9 +404,7 @@ class Editor(QgsCodeEditorPython):
                     try:
                         status = p.wait()
                     except OSError as e:
-                        if e.errno == 4:
-                            pass
-                        else:
+                        if e.errno != 4:
                             raise e
             if tmp:
                 tmpFileTr = QCoreApplication.translate('PythonConsole', ' [Temporary file saved in {0}]').format(dir)
@@ -443,10 +441,9 @@ class Editor(QgsCodeEditorPython):
         filename = tabWidget.path
         msgEditorBlank = QCoreApplication.translate('PythonConsole',
                                                     'Hey, type something to run!')
-        if filename is None:
-            if not self.isModified():
-                self.parent.pc.callWidgetMessageBarEditor(msgEditorBlank, 0, True)
-                return
+        if filename is None and not self.isModified():
+            self.parent.pc.callWidgetMessageBarEditor(msgEditorBlank, 0, True)
+            return
 
         if self.syntaxCheck():
             if filename and self.isModified() and autoSave:
@@ -467,8 +464,7 @@ class Editor(QgsCodeEditorPython):
 
     def getTextFromEditor(self):
         text = self.text()
-        textList = text.split("\n")
-        return textList
+        return text.split("\n")
 
     def goToLine(self, objName, linenr):
         self.SendScintilla(QsciScintilla.SCI_GOTOLINE, linenr - 1)
@@ -557,20 +553,18 @@ class Editor(QgsCodeEditorPython):
 
     def focusInEvent(self, e):
         pathfile = self.parent.path
-        if pathfile:
-            if not QFileInfo(pathfile).exists():
-                msgText = QCoreApplication.translate('PythonConsole',
-                                                     'The file <b>"{0}"</b> has been deleted or is not accessible').format(pathfile)
-                self.parent.pc.callWidgetMessageBarEditor(msgText, 2, False)
-                return
+        if pathfile and not QFileInfo(pathfile).exists():
+            msgText = QCoreApplication.translate('PythonConsole',
+                                                 'The file <b>"{0}"</b> has been deleted or is not accessible').format(pathfile)
+            self.parent.pc.callWidgetMessageBarEditor(msgText, 2, False)
+            return
         if pathfile and self.lastModified != QFileInfo(pathfile).lastModified():
             self.beginUndoAction()
             self.selectAll()
             # fileReplaced = self.selectedText()
             self.removeSelectedText()
-            file = open(pathfile, "r")
-            fileLines = file.readlines()
-            file.close()
+            with open(pathfile, "r") as file:
+                fileLines = file.readlines()
             with OverrideCursor(Qt.WaitCursor):
                 for line in reversed(fileLines):
                     self.insert(line)
@@ -598,7 +592,7 @@ class EditorTab(QWidget):
         self.readOnly = readOnly
 
         self.fileExecuteList = {}
-        self.fileExecuteList = dict()
+        self.fileExecuteList = {}
 
         self.newEditor = Editor(self)
         if filename:
@@ -1013,77 +1007,76 @@ class EditorTabWidget(QTabWidget):
             tabWidget = self.widget(self.indexOf(tab))
         else:
             tabWidget = self.widget(tab)
-        if tabWidget:
-            if tabWidget.path:
-                pathFile, file = os.path.split(tabWidget.path)
-                module, ext = os.path.splitext(file)
-                found = False
-                if pathFile not in sys.path:
-                    sys.path.append(pathFile)
-                    found = True
-                try:
-                    importlib.reload(pyclbr)  # NOQA
-                    dictObject = {}
-                    readModule = pyclbr.readmodule(module)
-                    readModuleFunction = pyclbr.readmodule_ex(module)
-                    for name, class_data in sorted(list(readModule.items()), key=lambda x: x[1].lineno):
-                        if os.path.normpath(class_data.file) == os.path.normpath(tabWidget.path):
-                            superClassName = []
-                            for superClass in class_data.super:
-                                if superClass == 'object':
-                                    continue
-                                if isinstance(superClass, str):
-                                    superClassName.append(superClass)
-                                else:
-                                    superClassName.append(superClass.name)
-                            classItem = QTreeWidgetItem()
-                            if superClassName:
-                                super = ', '.join([i for i in superClassName])
-                                classItem.setText(0, name + ' [' + super + ']')
-                                classItem.setToolTip(0, name + ' [' + super + ']')
+        if tabWidget and tabWidget.path:
+            pathFile, file = os.path.split(tabWidget.path)
+            module, ext = os.path.splitext(file)
+            found = False
+            if pathFile not in sys.path:
+                sys.path.append(pathFile)
+                found = True
+            try:
+                importlib.reload(pyclbr)  # NOQA
+                dictObject = {}
+                readModule = pyclbr.readmodule(module)
+                readModuleFunction = pyclbr.readmodule_ex(module)
+                for name, class_data in sorted(list(readModule.items()), key=lambda x: x[1].lineno):
+                    if os.path.normpath(class_data.file) == os.path.normpath(tabWidget.path):
+                        superClassName = []
+                        for superClass in class_data.super:
+                            if superClass == 'object':
+                                continue
+                            if isinstance(superClass, str):
+                                superClassName.append(superClass)
                             else:
-                                classItem.setText(0, name)
-                                classItem.setToolTip(0, name)
+                                superClassName.append(superClass.name)
+                        classItem = QTreeWidgetItem()
+                        if superClassName:
+                            super = ', '.join(superClassName)
+                            classItem.setText(0, name + ' [' + super + ']')
+                            classItem.setToolTip(0, name + ' [' + super + ']')
+                        else:
+                            classItem.setText(0, name)
+                            classItem.setToolTip(0, name)
+                        if sys.platform.startswith('win'):
+                            classItem.setSizeHint(0, QSize(18, 18))
+                        classItem.setText(1, str(class_data.lineno))
+                        iconClass = QgsApplication.getThemeIcon("console/iconClassTreeWidgetConsole.svg")
+                        classItem.setIcon(0, iconClass)
+                        dictObject[name] = class_data.lineno
+                        for meth, lineno in sorted(list(class_data.methods.items()), key=itemgetter(1)):
+                            methodItem = QTreeWidgetItem()
+                            methodItem.setText(0, meth + ' ')
+                            methodItem.setText(1, str(lineno))
+                            methodItem.setToolTip(0, meth)
+                            iconMeth = QgsApplication.getThemeIcon("console/iconMethodTreeWidgetConsole.svg")
+                            methodItem.setIcon(0, iconMeth)
                             if sys.platform.startswith('win'):
-                                classItem.setSizeHint(0, QSize(18, 18))
-                            classItem.setText(1, str(class_data.lineno))
-                            iconClass = QgsApplication.getThemeIcon("console/iconClassTreeWidgetConsole.svg")
-                            classItem.setIcon(0, iconClass)
-                            dictObject[name] = class_data.lineno
-                            for meth, lineno in sorted(list(class_data.methods.items()), key=itemgetter(1)):
-                                methodItem = QTreeWidgetItem()
-                                methodItem.setText(0, meth + ' ')
-                                methodItem.setText(1, str(lineno))
-                                methodItem.setToolTip(0, meth)
-                                iconMeth = QgsApplication.getThemeIcon("console/iconMethodTreeWidgetConsole.svg")
-                                methodItem.setIcon(0, iconMeth)
-                                if sys.platform.startswith('win'):
-                                    methodItem.setSizeHint(0, QSize(18, 18))
-                                classItem.addChild(methodItem)
-                                dictObject[meth] = lineno
-                            self.parent.listClassMethod.addTopLevelItem(classItem)
-                    for func_name, data in sorted(list(readModuleFunction.items()), key=lambda x: x[1].lineno):
-                        if isinstance(data, pyclbr.Function) and \
-                           os.path.normpath(data.file) == os.path.normpath(tabWidget.path):
-                            funcItem = QTreeWidgetItem()
-                            funcItem.setText(0, func_name + ' ')
-                            funcItem.setText(1, str(data.lineno))
-                            funcItem.setToolTip(0, func_name)
-                            iconFunc = QgsApplication.getThemeIcon("console/iconFunctionTreeWidgetConsole.svg")
-                            funcItem.setIcon(0, iconFunc)
-                            if sys.platform.startswith('win'):
-                                funcItem.setSizeHint(0, QSize(18, 18))
-                            dictObject[func_name] = data.lineno
-                            self.parent.listClassMethod.addTopLevelItem(funcItem)
-                    if found:
-                        sys.path.remove(pathFile)
-                except:
-                    msgItem = QTreeWidgetItem()
-                    msgItem.setText(0, QCoreApplication.translate("PythonConsole", "Check Syntax"))
-                    msgItem.setText(1, 'syntaxError')
-                    iconWarning = QgsApplication.getThemeIcon("console/iconSyntaxErrorConsole.svg")
-                    msgItem.setIcon(0, iconWarning)
-                    self.parent.listClassMethod.addTopLevelItem(msgItem)
+                                methodItem.setSizeHint(0, QSize(18, 18))
+                            classItem.addChild(methodItem)
+                            dictObject[meth] = lineno
+                        self.parent.listClassMethod.addTopLevelItem(classItem)
+                for func_name, data in sorted(list(readModuleFunction.items()), key=lambda x: x[1].lineno):
+                    if isinstance(data, pyclbr.Function) and \
+                       os.path.normpath(data.file) == os.path.normpath(tabWidget.path):
+                        funcItem = QTreeWidgetItem()
+                        funcItem.setText(0, func_name + ' ')
+                        funcItem.setText(1, str(data.lineno))
+                        funcItem.setToolTip(0, func_name)
+                        iconFunc = QgsApplication.getThemeIcon("console/iconFunctionTreeWidgetConsole.svg")
+                        funcItem.setIcon(0, iconFunc)
+                        if sys.platform.startswith('win'):
+                            funcItem.setSizeHint(0, QSize(18, 18))
+                        dictObject[func_name] = data.lineno
+                        self.parent.listClassMethod.addTopLevelItem(funcItem)
+                if found:
+                    sys.path.remove(pathFile)
+            except:
+                msgItem = QTreeWidgetItem()
+                msgItem.setText(0, QCoreApplication.translate("PythonConsole", "Check Syntax"))
+                msgItem.setText(1, 'syntaxError')
+                iconWarning = QgsApplication.getThemeIcon("console/iconSyntaxErrorConsole.svg")
+                msgItem.setIcon(0, iconWarning)
+                self.parent.listClassMethod.addTopLevelItem(msgItem)
                     # s = traceback.format_exc()
                     # print('## Error: ')
                     # sys.stderr.write(s)
@@ -1109,9 +1102,6 @@ class EditorTabWidget(QTabWidget):
 
     def widgetMessageBar(self, iface, text, level, timed=True):
         messageLevel = [Qgis.Info, Qgis.Warning, Qgis.Critical]
-        if timed:
-            timeout = iface.messageTimeout()
-        else:
-            timeout = 0
+        timeout = iface.messageTimeout() if timed else 0
         currWidget = self.currentWidget()
         currWidget.infoBar.pushMessage(text, messageLevel[level], timeout)
