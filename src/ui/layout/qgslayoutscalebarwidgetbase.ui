@@ -60,9 +60,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-453</y>
-        <width>451</width>
-        <height>1076</height>
+        <y>0</y>
+        <width>440</width>
+        <height>1008</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="mainLayout">
@@ -171,7 +171,7 @@
             <property name="maximum">
              <double>9999999999999.000000000000000</double>
             </property>
-            <property name="showClearButton" stdset="0">
+            <property name="showClearButton">
              <bool>false</bool>
             </property>
            </widget>
@@ -256,7 +256,7 @@
             <property name="maximum">
              <double>9999999999999.000000000000000</double>
             </property>
-            <property name="showClearButton" stdset="0">
+            <property name="showClearButton">
              <bool>false</bool>
             </property>
            </widget>
@@ -595,15 +595,30 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QgsScrollArea</class>
-   <extends>QScrollArea</extends>
-   <header>qgsscrollarea.h</header>
-   <container>1</container>
+   <class>QgsDoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>qgsdoublespinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsFontButton</class>
+   <extends>QToolButton</extends>
+   <header>qgsfontbutton.h</header>
   </customwidget>
   <customwidget>
    <class>QgsSpinBox</class>
    <extends>QSpinBox</extends>
    <header>qgsspinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsSymbolButton</class>
+   <extends>QToolButton</extends>
+   <header>qgssymbolbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header>qgsscrollarea.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>QgsCollapsibleGroupBoxBasic</class>
@@ -612,29 +627,14 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QgsDoubleSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
-   <header>qgsdoublespinbox.h</header>
-  </customwidget>
-  <customwidget>
    <class>QgsLayoutItemComboBox</class>
    <extends>QComboBox</extends>
    <header>qgslayoutitemcombobox.h</header>
   </customwidget>
   <customwidget>
-   <class>QgsFontButton</class>
-   <extends>QToolButton</extends>
-   <header>qgsfontbutton.h</header>
-  </customwidget>
-  <customwidget>
    <class>QgsAlignmentComboBox</class>
    <extends>QComboBox</extends>
    <header>qgsalignmentcombobox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QgsSymbolButton</class>
-   <extends>QToolButton</extends>
-   <header>qgssymbolbutton.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
