@@ -352,6 +352,10 @@ void QgsLayoutItemScaleBar::refreshSegmentMillimeters()
         }
         break;
       }
+      case QgsScaleBarSettings::SegmentSizeFitCount:
+      {
+        // const double nSegments
+      }
     }
   }
 }

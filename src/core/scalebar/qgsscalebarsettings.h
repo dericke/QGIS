@@ -57,7 +57,8 @@ class CORE_EXPORT QgsScaleBarSettings
     enum SegmentSizeMode
     {
       SegmentSizeFixed = 0, //!< Scale bar segment size is fixed to a map unit
-      SegmentSizeFitWidth = 1 //!< Scale bar segment size is calculated to fit a size range
+      SegmentSizeFitWidth = 1, //!< Scale bar segment size is calculated to fit a size range
+      SegmentSizeFitCount = 2 //!< Scale bar segment count is calculated to fit a size range
     };
 
     /**

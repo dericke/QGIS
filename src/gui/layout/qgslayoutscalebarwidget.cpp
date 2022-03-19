@@ -710,9 +710,10 @@ void QgsLayoutScaleBarWidget::disconnectUpdateSignal()
 void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
 {
   const bool fixedSizeMode = radio == mFixedSizeRadio;
-  mMinWidthSpinBox->setEnabled( !fixedSizeMode );
-  mMaxWidthSpinBox->setEnabled( !fixedSizeMode );
-  mSegmentSizeSpinBox->setEnabled( fixedSizeMode );
+  const bool fitCountMode = radio == mFitCountRadio;
+  mMinWidthSpinBox->setEnabled( !fixedSizeMode && !fitCountMode );
+  mMaxWidthSpinBox->setEnabled( !fixedSizeMode && !fitCountMode );
+  mSegmentSizeSpinBox->setEnabled( fixedSizeMode || fitCountMode );
 
   if ( !mScalebar )
   {
@@ -724,6 +725,11 @@ void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
   if ( mFixedSizeRadio->isChecked() )
   {
     mScalebar->setSegmentSizeMode( QgsScaleBarSettings::SegmentSizeFixed );
+    mScalebar->setUnitsPerSegment( mSegmentSizeSpinBox->value() );
+  }
+  else if ( mFitCountRadio->isChecked())
+  {
+    mScalebar->setSegmentSizeMode( QgsScaleBarSettings::SegmentSizeFitCount );
     mScalebar->setUnitsPerSegment( mSegmentSizeSpinBox->value() );
   }
   else /*if(mFitWidthRadio->isChecked())*/

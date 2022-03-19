@@ -235,10 +235,86 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,0">
-          <item row="0" column="0">
-           <widget class="QLabel" name="mSegmentLabel">
+          <item row="7" column="2">
+           <widget class="QgsSpinBox" name="mNumberOfSubdivisionsSpinBox">
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QRadioButton" name="mFixedSizeRadio">
             <property name="text">
-             <string>Segments</string>
+             <string>Fi&amp;xed width</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QgsDoubleSpinBox" name="mHeightSpinBox">
+            <property name="suffix">
+             <string> mm</string>
+            </property>
+            <property name="maximum">
+             <double>9999999999999.000000000000000</double>
+            </property>
+            <property name="showClearButton">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="2">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="mSubdivisionsLabel">
+            <property name="text">
+             <string>Right segments subdivisions</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QgsSpinBox" name="mSegmentsLeftSpinBox">
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="prefix">
+             <string>left </string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="2">
+           <widget class="QgsDoubleSpinBox" name="mSubdivisionsHeightSpinBox">
+            <property name="suffix">
+             <string> mm</string>
+            </property>
+            <property name="maximum">
+             <double>999.990000000000009</double>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QgsDoubleSpinBox" name="mMinWidthSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> mm</string>
+            </property>
+            <property name="maximum">
+             <double>999.990000000000009</double>
             </property>
            </widget>
           </item>
@@ -261,13 +337,6 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="2">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Height</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
            <widget class="QgsSpinBox" name="mNumberOfSegmentsSpinBox">
             <property name="suffix">
@@ -281,57 +350,28 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QgsSpinBox" name="mSegmentsLeftSpinBox">
-            <property name="suffix">
-             <string/>
-            </property>
-            <property name="prefix">
-             <string>left </string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QRadioButton" name="mFixedSizeRadio">
-            <property name="text">
-             <string>Fi&amp;xed width</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2">
+          <item row="4" column="0" colspan="2">
            <widget class="QRadioButton" name="mFitWidthRadio">
             <property name="text">
              <string>Fit segment width</string>
             </property>
            </widget>
           </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="mSegmentLabel">
+            <property name="text">
+             <string>Segments</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="mSubdivisionsHeightLabel">
+            <property name="text">
+             <string>Subdivisions height</string>
+            </property>
+           </widget>
+          </item>
           <item row="5" column="2">
-           <widget class="QgsDoubleSpinBox" name="mHeightSpinBox">
-            <property name="suffix">
-             <string> mm</string>
-            </property>
-            <property name="maximum">
-             <double>999.990000000000009</double>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QgsDoubleSpinBox" name="mMinWidthSpinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="suffix">
-             <string> mm</string>
-            </property>
-            <property name="maximum">
-             <double>999.990000000000009</double>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
            <widget class="QgsDoubleSpinBox" name="mMaxWidthSpinBox">
             <property name="enabled">
              <bool>false</bool>
@@ -344,40 +384,10 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="mSubdivisionsLabel">
+          <item row="3" column="0">
+           <widget class="QRadioButton" name="mFitCountRadio">
             <property name="text">
-             <string>Right segments subdivisions</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="2">
-           <widget class="QgsSpinBox" name="mNumberOfSubdivisionsSpinBox">
-            <property name="suffix">
-             <string/>
-            </property>
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="mSubdivisionsHeightLabel">
-            <property name="text">
-             <string>Subdivisions height</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="2">
-           <widget class="QgsDoubleSpinBox" name="mSubdivisionsHeightSpinBox">
-            <property name="suffix">
-             <string> mm</string>
-            </property>
-            <property name="maximum">
-             <double>999.990000000000009</double>
+             <string>Fit segment count</string>
             </property>
            </widget>
           </item>
