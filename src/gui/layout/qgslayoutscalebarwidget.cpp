@@ -310,29 +310,29 @@ void QgsLayoutScaleBarWidget::setGuiElements()
   //units
   mUnitsComboBox->setCurrentIndex( mUnitsComboBox->findData( static_cast< int >( mScalebar->units() ) ) );
 
-  if ( mScalebar->segmentSizeMode() == QgsScaleBarSettings::SegmentSizeFixed )
+  switch ( mScalebar->segmentSizeMode() )
   {
-    mFixedSizeRadio->setChecked( true );
-    mSegmentSizeSpinBox->setEnabled( true );
-    mMinWidthSpinBox->setEnabled( false );
-    mMaxWidthSpinBox->setEnabled( false );
-    mNumberOfSegmentsSpinBox->setEnabled( true );
-  }
-  else if ( mScalebar->segmentSizeMode() == QgsScaleBarSettings::SegmentSizeFitCount )
-  {
-    mFixedSizeRadio->setChecked( true );
-    mSegmentSizeSpinBox->setEnabled( true );
-    mMinWidthSpinBox->setEnabled( false );
-    mMaxWidthSpinBox->setEnabled( false );
-    mNumberOfSegmentsSpinBox->setEnabled( false );
-  }
-  else /*if(mComposerScaleBar->segmentSizeMode() == QgsComposerScaleBar::SegmentSizeFitWidth)*/
-  {
-    mFitWidthRadio->setChecked( true );
-    mSegmentSizeSpinBox->setEnabled( false );
-    mMinWidthSpinBox->setEnabled( true );
-    mMaxWidthSpinBox->setEnabled( true );
-    mNumberOfSegmentsSpinBox->setEnabled( true );
+    case QgsScaleBarSettings::SegmentSizeFixed:
+      mFixedSizeRadio->setChecked( true );
+      mSegmentSizeSpinBox->setEnabled( true );
+      mMinWidthSpinBox->setEnabled( false );
+      mMaxWidthSpinBox->setEnabled( false );
+      mNumberOfSegmentsSpinBox->setEnabled( true );
+      break;
+    case QgsScaleBarSettings::SegmentSizeFitCount:
+      mFitCountRadio->setChecked( true );
+      mSegmentSizeSpinBox->setEnabled( true );
+      mMinWidthSpinBox->setEnabled( false );
+      mMaxWidthSpinBox->setEnabled( false );
+      mNumberOfSegmentsSpinBox->setEnabled( false );
+      break;
+    case QgsComposerScaleBar::SegmentSizeFitWidth):
+      mFitWidthRadio->setChecked( true );
+      mSegmentSizeSpinBox->setEnabled( false );
+      mMinWidthSpinBox->setEnabled( true );
+      mMaxWidthSpinBox->setEnabled( true );
+      mNumberOfSegmentsSpinBox->setEnabled( true );
+      break;
   }
   mMinWidthSpinBox->setValue( mScalebar->minimumBarWidth() );
   mMaxWidthSpinBox->setValue( mScalebar->maximumBarWidth() );
