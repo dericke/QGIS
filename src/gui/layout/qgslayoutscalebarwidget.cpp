@@ -316,6 +316,15 @@ void QgsLayoutScaleBarWidget::setGuiElements()
     mSegmentSizeSpinBox->setEnabled( true );
     mMinWidthSpinBox->setEnabled( false );
     mMaxWidthSpinBox->setEnabled( false );
+    mNumberOfSegmentsSpinBox->setEnabled( true );
+  }
+  else if ( mScalebar->segmentSizeMode() == QgsScaleBarSettings::SegmentSizeFitCount )
+  {
+    mFixedSizeRadio->setChecked( true );
+    mSegmentSizeSpinBox->setEnabled( true );
+    mMinWidthSpinBox->setEnabled( false );
+    mMaxWidthSpinBox->setEnabled( false );
+    mNumberOfSegmentsSpinBox->setEnabled( false );
   }
   else /*if(mComposerScaleBar->segmentSizeMode() == QgsComposerScaleBar::SegmentSizeFitWidth)*/
   {
@@ -323,6 +332,7 @@ void QgsLayoutScaleBarWidget::setGuiElements()
     mSegmentSizeSpinBox->setEnabled( false );
     mMinWidthSpinBox->setEnabled( true );
     mMaxWidthSpinBox->setEnabled( true );
+    mNumberOfSegmentsSpinBox->setEnabled( true );
   }
   mMinWidthSpinBox->setValue( mScalebar->minimumBarWidth() );
   mMaxWidthSpinBox->setValue( mScalebar->maximumBarWidth() );
