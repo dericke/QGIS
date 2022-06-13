@@ -24,10 +24,12 @@
 .kdev4/
 .project
 .pydevproject
+.qt_for_python/
 /CMakeLists.txt.user
 /CMakeLists.txt.user.*
 api_doc
 /build*
+cmake-build-debug/
 debian/*.debhelper
 debian/*.substvars
 debian/qgis.sh
