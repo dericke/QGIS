@@ -610,10 +610,20 @@ void QgsLayoutItemScaleBar::refreshSegmentMillimeters()
       case Qgis::ScaleBarSegmentSizeMode::FitSegment:
       {
         mSegmentMillimeters = composerItemRect.width() / currentMapWidth * mSettings.unitsPerSegment();
-        double totalWidth = composerItemRect.width();
-        int nSegments = static_cast<int>( std::round( totalWidth / mSegmentMillimeters ) );
+        const bool hasLeftSegments = mSettings.numberOfSegmentsLeft() > 0;
 
-        setNumberOfSegments( nSegments );
+        const double availableWidth = composerItemRect.width();
+        const double widthForRightSegments = hasLeftSegments ?
+                                             availableWidth - mSegmentMillimeters :
+                                             availableWidth;
+
+        const int totalRightSegments = static_cast<int>( std::floor( widthForRightSegments / mSegmentMillimeters ) );
+
+        if ( totalRightSegments > 0 )
+        {
+          if ( totalRightSegments != mSettings.numberOfSegments() )
+            setNumberOfSegments( totalRightSegments );
+        }
         break;
       }
     }
