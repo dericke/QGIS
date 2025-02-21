@@ -5047,6 +5047,7 @@ class CORE_EXPORT Qgis
       {
       Fixed SIP_MONKEYPATCH_COMPAT_NAME( SegmentSizeFixed ) = 0, //!< Scale bar segment size is fixed to a map unit
       FitWidth SIP_MONKEYPATCH_COMPAT_NAME( SegmentSizeFitWidth ) = 1 //!< Scale bar segment size is calculated to fit a size range
+      FitSegment SIP_MONKEYPATCH_COMPAT_NAME( SegmentSizeFitSegment ) = 2 //!< Scale segment count to maintain fixed segment size
     };
     Q_ENUM( ScaleBarSegmentSizeMode )
 

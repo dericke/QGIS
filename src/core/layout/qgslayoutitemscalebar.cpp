@@ -606,6 +606,16 @@ void QgsLayoutItemScaleBar::refreshSegmentMillimeters()
         }
         break;
       }
+
+      case Qgis::ScaleBarSegmentSizeMode::FitSegment:
+      {
+        mSegmentMillimeters = composerItemRect.width() / currentMapWidth * mSettings.unitsPerSegment();
+        double totalWidth = composerItemRect.width();
+        int nSegments = static_cast<int>( std::round( totalWidth / mSegmentMillimeters ) );
+
+        setNumberOfSegments( nSegments );
+        break;
+      }
     }
   }
 }

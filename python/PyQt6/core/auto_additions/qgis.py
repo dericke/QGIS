@@ -9966,6 +9966,10 @@ QgsScaleBarSettings.SegmentSizeFitWidth = Qgis.ScaleBarSegmentSizeMode.FitWidth
 QgsScaleBarSettings.SegmentSizeMode.SegmentSizeFitWidth = Qgis.ScaleBarSegmentSizeMode.FitWidth
 QgsScaleBarSettings.SegmentSizeFitWidth.is_monkey_patched = True
 QgsScaleBarSettings.SegmentSizeFitWidth.__doc__ = "Scale bar segment size is calculated to fit a size range"
+QgsScaleBarSettings.SegmentSizeFitSegment = Qgis.ScaleBarSegmentSizeMode.FitSegment
+QgsScaleBarSettings.SegmentSizeMode.SegmentSizeFitSegment = Qgis.ScaleBarSegmentSizeMode.FitSegment
+QgsScaleBarSettings.SegmentSizeFitSegment.is_monkey_patched = True
+QgsScaleBarSettings.SegmentSizeFitSegment.__doc__ = "Scale segment count to maintain fixed segment size"
 Qgis.ScaleBarSegmentSizeMode.__doc__ = """Modes for setting size for scale bar segments.
 
 .. note::
@@ -9981,6 +9985,10 @@ Qgis.ScaleBarSegmentSizeMode.__doc__ = """Modes for setting size for scale bar s
 * ``FitWidth``: Scale bar segment size is calculated to fit a size range
 
   Available as ``QgsScaleBarSettings.SegmentSizeFitWidth`` in older QGIS releases.
+
+* ``FitSegment``: Scale segment count to maintain fixed segment size
+
+  Available as ``QgsScaleBarSettings.SegmentSizeFitSegment`` in older QGIS releases.
 
 
 """

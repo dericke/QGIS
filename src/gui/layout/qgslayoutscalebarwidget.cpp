@@ -97,6 +97,7 @@ QgsLayoutScaleBarWidget::QgsLayoutScaleBarWidget( QgsLayoutItemScaleBar *scaleBa
 
   mSegmentSizeRadioGroup.addButton( mFixedSizeRadio );
   mSegmentSizeRadioGroup.addButton( mFitWidthRadio );
+  mSegmentSizeRadioGroup.addButton( mFitSegmentRadio );
   connect( &mSegmentSizeRadioGroup, static_cast<void ( QButtonGroup::* )( QAbstractButton * )>( &QButtonGroup::buttonClicked ), this, &QgsLayoutScaleBarWidget::segmentSizeRadioChanged );
 
   blockMemberSignals( true );
@@ -354,6 +355,8 @@ void QgsLayoutScaleBarWidget::setGuiElements()
       mSegmentSizeWidget->setEnabled( true );
       mMinWidthWidget->setEnabled( false );
       mMaxWidthWidget->setEnabled( false );
+      mNumberOfSegmentsSpinBox->setEnabled( true );
+      mSegmentsLeftSpinBox->setEnabled( true );
       break;
     }
 
@@ -363,6 +366,19 @@ void QgsLayoutScaleBarWidget::setGuiElements()
       mSegmentSizeWidget->setEnabled( false );
       mMinWidthWidget->setEnabled( true );
       mMaxWidthWidget->setEnabled( true );
+      mNumberOfSegmentsSpinBox->setEnabled( true );
+      mSegmentsLeftSpinBox->setEnabled( true );
+      break;
+    }
+
+    case Qgis::ScaleBarSegmentSizeMode::FitSegment:
+    {
+      mFitSegmentRadio->setChecked( true );
+      mSegmentSizeWidget->setEnabled( true );
+      mMinWidthWidget->setEnabled( false );
+      mMaxWidthWidget->setEnabled( false );
+      mNumberOfSegmentsSpinBox->setEnabled( false );
+      mSegmentsLeftSpinBox->setEnabled( false );
       break;
     }
   }
@@ -788,9 +804,13 @@ void QgsLayoutScaleBarWidget::disconnectUpdateSignal()
 void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
 {
   const bool fixedSizeMode = radio == mFixedSizeRadio;
-  mMinWidthWidget->setEnabled( !fixedSizeMode );
-  mMaxWidthWidget->setEnabled( !fixedSizeMode );
-  mSegmentSizeWidget->setEnabled( fixedSizeMode );
+  const bool fitWidthMode = radio == mFitWidthRadio;
+  const bool fitSegmentMode = radio == mFitSegmentRadio;
+
+  mMinWidthWidget->setEnabled( fitWidthMode );
+  mMaxWidthWidget->setEnabled( fitWidthMode );
+  mSegmentSizeWidget->setEnabled( fixedSizeMode || fitSegmentMode );
+  mNumberOfSegmentsSpinBox->setEnabled( fixedSizeMode || fitWidthMode );
 
   if ( !mScalebar )
   {
@@ -799,14 +819,19 @@ void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
 
   mScalebar->beginCommand( tr( "Set Scalebar Size Mode" ), QgsLayoutItem::UndoScaleBarSegmentSize );
   disconnectUpdateSignal();
-  if ( mFixedSizeRadio->isChecked() )
+  if ( fixedSizeMode )
   {
     mScalebar->setSegmentSizeMode( Qgis::ScaleBarSegmentSizeMode::Fixed );
     mScalebar->setUnitsPerSegment( mSegmentSizeSpinBox->value() );
   }
-  else /*if(mFitWidthRadio->isChecked())*/
+  else if ( fitWidthMode )
   {
     mScalebar->setSegmentSizeMode( Qgis::ScaleBarSegmentSizeMode::FitWidth );
+  }
+  else // fitSegmentMode
+  {
+    mScalebar->setSegmentSizeMode( Qgis::ScaleBarSegmentSizeMode::FitSegment );
+    mScalebar->setUnitsPerSegment( mSegmentSizeSpinBox->value() );
   }
   mScalebar->update();
   connectUpdateSignal();
