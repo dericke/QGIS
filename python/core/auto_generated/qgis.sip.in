@@ -2858,7 +2858,7 @@ The development version
     enum class ScaleBarSegmentSizeMode
       {
       Fixed,
-      FitWidth
+      FitWidth,
       FitSegment
     };
 
