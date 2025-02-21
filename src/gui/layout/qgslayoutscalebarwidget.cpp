@@ -831,7 +831,6 @@ void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
   else // fitSegmentMode
   {
     mScalebar->setSegmentSizeMode( Qgis::ScaleBarSegmentSizeMode::FitSegment );
-    mScalebar->setUnitsPerSegment( mSegmentSizeSpinBox->value() );
   }
   mScalebar->update();
   connectUpdateSignal();
