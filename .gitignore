@@ -34,6 +34,7 @@
 .vs
 .devcontainer
 .worktrees
+.zed/
 CMakePresets.json
 /CMakeLists.txt.user
 /CMakeLists.txt.user.*
