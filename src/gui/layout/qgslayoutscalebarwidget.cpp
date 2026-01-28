@@ -812,6 +812,7 @@ void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
   mMaxWidthWidget->setEnabled( fitWidthMode );
   mSegmentSizeWidget->setEnabled( fixedSizeMode || fitSegmentMode );
   mNumberOfSegmentsSpinBox->setEnabled( fixedSizeMode || fitWidthMode );
+  mSegmentsLeftSpinBox->setEnabled( fixedSizeMode || fitWidthMode );
 
   if ( !mScalebar )
   {
@@ -829,7 +830,7 @@ void QgsLayoutScaleBarWidget::segmentSizeRadioChanged( QAbstractButton *radio )
   {
     mScalebar->setSegmentSizeMode( Qgis::ScaleBarSegmentSizeMode::FitWidth );
   }
-  else // fitSegmentMode
+  else if ( fitSegmentMode )
   {
     mScalebar->setSegmentSizeMode( Qgis::ScaleBarSegmentSizeMode::FitSegment );
   }

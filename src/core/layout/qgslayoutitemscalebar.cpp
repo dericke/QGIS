@@ -16,6 +16,7 @@
 
 #include "qgslayoutitemscalebar.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "qgsdistancearea.h"
@@ -622,13 +623,10 @@ void QgsLayoutItemScaleBar::refreshSegmentMillimeters()
                                              availableWidth - mSegmentMillimeters :
                                              availableWidth;
 
-        const int totalRightSegments = static_cast<int>( std::floor( widthForRightSegments / mSegmentMillimeters ) );
+        const int totalRightSegments = std::max( 1, static_cast<int>( std::floor( widthForRightSegments / mSegmentMillimeters ) ) );
 
-        if ( totalRightSegments > 0 )
-        {
-          if ( totalRightSegments != mSettings.numberOfSegments() )
-            setNumberOfSegments( totalRightSegments );
-        }
+        if ( totalRightSegments != mSettings.numberOfSegments() )
+          setNumberOfSegments( totalRightSegments );
         break;
       }
     }
